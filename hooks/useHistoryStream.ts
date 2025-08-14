@@ -88,15 +88,28 @@ export default function useHistoryStream(prompt?: string | null) {
                   
                   if (parsed.type === "summary") {
                     console.log("Setting summary:", parsed.summary);
-                    setSummary(parsed.summary);
+                    // Sprawdź czy summary nie jest domyślne
+                    if (parsed.summary && parsed.summary !== "Alternative history scenario") {
+                      setSummary(parsed.summary);
+                    }
                   }
                   if (parsed.type === "event") {
                     console.log("Adding event:", parsed);
-                    setEvents(prev => {
-                      const newEvents = [...prev, parsed];
-                      console.log("Events array now has", newEvents.length, "items");
-                      return newEvents;
-                    });
+                    // Sprawdź czy event nie ma domyślnych wartości
+                    if (parsed.year && 
+                        parsed.year !== 1800 && 
+                        parsed.title && 
+                        parsed.title !== "Event" && 
+                        parsed.description && 
+                        parsed.description !== "A significant historical event") {
+                      setEvents(prev => {
+                        const newEvents = [...prev, parsed];
+                        console.log("Events array now has", newEvents.length, "items");
+                        return newEvents;
+                      });
+                    } else {
+                      console.log("Skipping event with default values:", parsed);
+                    }
                   }
                   if (parsed.type === "geoChanges") {
                     console.log("Setting geo changes:", parsed.geoChanges);
