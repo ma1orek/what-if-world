@@ -7,12 +7,49 @@ export default function usePlayback(mapApiRef: React.RefObject<any>, events: Eve
   const [playing, setPlaying] = useState(false);
   const [localMuted, setLocalMuted] = useState(muted);
   const utterRef = useRef<SpeechSynthesisUtterance|null>(null);
-  // helper: męski głos
+  // helper: męski głos - poprawiony dla telefonów
   function pickMale(){
     const voices = window.speechSynthesis.getVoices();
-    const prefs = [/Male/i, /Google UK English Male/i, /Microsoft.*(Guy|Ryan|Brandon)/i, /en-US/i];
-    for(const re of prefs){ const v = voices.find(v=> re.test(v.name+v.voiceURI)); if (v) return v; }
-    return voices[0] || null;
+    
+    // Sprawdź czy to urządzenie mobilne
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    
+    if (isMobile) {
+      // Na telefonie preferuj głosy systemowe
+      const mobilePrefs = [
+        /en-US/i,
+        /en-GB/i, 
+        /English/i,
+        /Samantha/i,  // iOS
+        /Google UK English/i,
+        /Microsoft.*/i
+      ];
+      
+      for (const re of mobilePrefs) {
+        const v = voices.find(v => re.test(v.name + v.voiceURI));
+        if (v) {
+          console.log("Mobile voice selected:", v.name);
+          return v;
+        }
+      }
+    } else {
+      // Na desktopie preferuj męskie głosy
+      const desktopPrefs = [/Male/i, /Google UK English Male/i, /Microsoft.*(Guy|Ryan|Brandon)/i, /en-US/i];
+      for (const re of desktopPrefs) {
+        const v = voices.find(v => re.test(v.name + v.voiceURI));
+        if (v) {
+          console.log("Desktop voice selected:", v.name);
+          return v;
+        }
+      }
+    }
+    
+    // Fallback - pierwszy dostępny głos
+    const fallback = voices[0];
+    if (fallback) {
+      console.log("Fallback voice selected:", fallback.name);
+    }
+    return fallback || null;
   }
 
   function speak(text:string){
@@ -23,13 +60,48 @@ export default function usePlayback(mapApiRef: React.RefObject<any>, events: Eve
         return resolve();
       }
       console.log("speak() proceeding - localMuted is false");
+      
       const u = new SpeechSynthesisUtterance(text);
-      u.rate = 0.95; u.pitch = 0.9; u.lang = "en-US";
-      const v = pickMale(); if (v) u.voice = v;
+      
+      // Sprawdź czy to urządzenie mobilne
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      
+      if (isMobile) {
+        // Na telefonie używaj bardziej naturalnych ustawień
+        u.rate = 0.9;      // Wolniej
+        u.pitch = 1.0;     // Normalny pitch
+        u.lang = "en-US";
+        u.volume = 1.0;    // Pełna głośność
+      } else {
+        // Na desktopie używaj poprzednich ustawień
+        u.rate = 0.95;
+        u.pitch = 0.9;
+        u.lang = "en-US";
+      }
+      
+      const v = pickMale(); 
+      if (v) u.voice = v;
+      
+      // Dodaj obsługę błędów
+      u.onerror = (event) => {
+        console.error("Speech synthesis error:", event);
+        resolve();
+      };
+      
       u.onend = () => resolve();
       utterRef.current = u;
-      window.speechSynthesis.cancel(); // upewnij się, że nie gada coś poprzedniego
-      window.speechSynthesis.speak(u);
+      
+      // Upewnij się, że nie gada coś poprzedniego
+      window.speechSynthesis.cancel();
+      
+      // Na telefonie dodaj małe opóźnienie
+      if (isMobile) {
+        setTimeout(() => {
+          window.speechSynthesis.speak(u);
+        }, 100);
+      } else {
+        window.speechSynthesis.speak(u);
+      }
     });
   }
 
