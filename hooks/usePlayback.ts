@@ -187,12 +187,17 @@ export default function usePlayback(mapApiRef: React.RefObject<any>, events: Eve
     
     // Odtwórz intro summary jeśli istnieje
     if (summary && summary.trim()) {
+      console.log("Reading intro...");
       await speak(summary);
+      console.log("Intro finished, waiting 2 seconds before first event...");
+      
+      // Czekaj 2 sekundy przed pierwszym eventem
+      await new Promise(resolve => setTimeout(resolve, 2000));
     }
     
     phaseRef.current = "events";
     
-    // Automatycznie przejdź do pierwszego eventu po intro - NAPRAWIONE
+    // Automatycznie przejdź do pierwszego eventu po intro
     if (eventsRef.current.length > 0 && !firstEventStartedRef.current) {
       firstEventStartedRef.current = true;
       console.log("Auto-advancing to first event after intro");
@@ -237,22 +242,30 @@ export default function usePlayback(mapApiRef: React.RefObject<any>, events: Eve
     }
 
     const line = `${ev.year} — ${ev.title}. ${ev.description}`;
+    console.log(`Reading event ${i}: ${line}`);
     await speak(line);
+    console.log(`Event ${i} finished, waiting 1 second before next...`);
 
     // wyłącz mini-waveform po zakończeniu mowy
     if (mapApiRef.current && markerIdsRef.current[i]){
       mapApiRef.current.showWaveform(markerIdsRef.current[i], false);
     }
 
+    // Czekaj 1 sekundę przed następnym eventem
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
     // auto-advance, ale tylko jeśli playing jest true i kolejny istnieje:
     if (eventsRef.current[i+1] && playingRef.current) {
       // Sprawdź czy nie został wciśnięty pause podczas mówienia
       if (playingRef.current) {
+        console.log(`Auto-advancing to event ${i+1}`);
         await playEvent(i+1);
       } else {
+        console.log("Pause detected, stopping auto-advance");
         setPlaying(false);
       }
     } else {
+      console.log("No more events or playing stopped, finishing");
       setPlaying(false);
     }
     
