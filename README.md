@@ -86,23 +86,25 @@ OPENAI_API_KEY=your_openai_api_key_here
 NEXT_PUBLIC_SITE_URL=https://www.whatify.world
 ```
 
-## 🧪 Testing Instructions for Hackathon Judges
+## 🧪 Live Project Testing
 
-**Live Demo**: https://www.whatify.world
+**Live Application**: [https://www.whatify.world](https://www.whatify.world)
 
-### **How to Test:**
+### **How to Experience the Full Project:**
 
-1. **Open the application** at the link above
+1. **Visit the live application** at the link above
 2. **Enter a historical "What if..." prompt** (examples provided on homepage)
 3. **Wait for AI generation** (usually 10-30 seconds)
 4. **Explore the interactive timeline** and world map
 5. **Enable narration** to hear AI voice-over
 6. **Navigate through events** using playback controls
 
-### **No Login Required**
-- Completely public demo
-- No authentication barriers
-- Instant access to all features
+### **Production Ready Features**
+- Fully functional AI-powered alternate history generator
+- Interactive world map with geographic transformations
+- Real-time AI narration and timeline playback
+- Mobile-responsive design
+- No authentication barriers - instant access
 
 ### **Example Test Scenarios**
 - "What if the Roman Empire never fell?"
@@ -170,7 +172,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 📞 Contact
 - **Creator**: [Bartosz Idzik](https://www.linkedin.com/in/bartosz-idzik-97770098/) - LinkedIn
 - **Project Link**: https://github.com/ma1orek/what-if-world
-- **Live Demo**: https://www.whatify.world
+- **Live Application**: [https://www.whatify.world](https://www.whatify.world)
 - **Hackathon**: Built for Kiro Hackathon 2025
 
 ---
