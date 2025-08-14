@@ -69,12 +69,14 @@ export default function usePlayback(mapApiRef: React.RefObject<any>, events: Eve
       await speak(summary);
     }
     
-    // Intro zostało przeczytane - teraz można przejść do eventów
     phaseRef.current = "events";
     
-    // NIE przechodź automatycznie do pierwszego eventu - czekaj na play
-    // Użytkownik musi wcisnąć play żeby przejść do eventów
-    console.log("Intro finished - waiting for user to press play for events");
+    // Automatycznie przejdź do pierwszego eventu po intro - NAPRAWIONE
+    if (eventsRef.current.length > 0 && !firstEventStartedRef.current) {
+      firstEventStartedRef.current = true;
+      console.log("Auto-advancing to first event after intro");
+      await playEvent(0);
+    }
   }
 
   async function playEvent(i: number) {
@@ -197,23 +199,7 @@ export default function usePlayback(mapApiRef: React.RefObject<any>, events: Eve
 
   return { 
     index, playing, 
-    play: () => {
-      if (phaseRef.current === "intro" && !startedRef.current) {
-        // Pierwszy play - czytaj intro
-        playIntroThenEvents();
-      } else if (phaseRef.current === "events" && index === -1) {
-        // Play po intro - przejdź do pierwszego eventu
-        if (eventsRef.current.length > 0) {
-          firstEventStartedRef.current = true;
-          playEvent(0);
-        }
-      } else if (phaseRef.current === "events" && index >= 0) {
-        // Play podczas eventu - kontynuuj od aktualnego eventu
-        if (eventsRef.current[index]) {
-          playEvent(index);
-        }
-      }
-    },
+    play: playIntroThenEvents,
     pause, 
     next(){pause(); if(eventsRef.current[index+1]) playEvent(index+1); else if(eventsRef.current[0]) playEvent(0);}, 
     prev(){pause(); if(index > 0) playEvent(index-1);}, 
