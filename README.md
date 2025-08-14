@@ -1,4 +1,4 @@
-# Whatify 🌍 — AI-Powered Alternate History Timeline Generator
+# Whatify World — AI-Powered Alternate History Timeline Generator
 
 > Rewrite pivotal moments in history and watch an alternate timeline unfold on an interactive world map — narrated by AI.
 
