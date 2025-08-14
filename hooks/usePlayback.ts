@@ -78,12 +78,21 @@ export default function usePlayback(mapApiRef: React.RefObject<any>, events: Eve
           if (data.audioUrl) {
             console.log("ElevenLabs audio received, playing on mobile");
             const audio = new Audio(data.audioUrl);
+            
+            // Timeout fallback dla auto-advance
+            const timeoutId = setTimeout(() => {
+              console.log("ElevenLabs timeout fallback - continuing to next event");
+              resolve();
+            }, 5000); // 5 sekund timeout
+            
             audio.onended = () => {
               console.log("ElevenLabs audio finished on mobile");
+              clearTimeout(timeoutId);
               resolve(); // To pozwoli na auto-advance
             };
             audio.onerror = () => {
               console.log("ElevenLabs failed on mobile, using Web Speech fallback");
+              clearTimeout(timeoutId);
               // Fallback na Web Speech API
               const u = new SpeechSynthesisUtterance(text);
               u.rate = 0.9; u.pitch = 1.0; u.lang = "en-US"; u.volume = 1.0;
@@ -95,6 +104,7 @@ export default function usePlayback(mapApiRef: React.RefObject<any>, events: Eve
             };
             audio.play().catch(() => {
               console.log("Audio.play() failed on mobile, using Web Speech fallback");
+              clearTimeout(timeoutId);
               // Fallback na Web Speech API
               const u = new SpeechSynthesisUtterance(text);
               u.rate = 0.9; u.pitch = 1.0; u.lang = "en-US"; u.volume = 1.0;
