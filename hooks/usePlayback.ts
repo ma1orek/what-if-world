@@ -61,24 +61,68 @@ export default function usePlayback(mapApiRef: React.RefObject<any>, events: Eve
       }
       console.log("speak() proceeding - localMuted is false");
       
-      const u = new SpeechSynthesisUtterance(text);
-      
       // Sprawdź czy to urządzenie mobilne
       const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
       
       if (isMobile) {
-        // Na telefonie używaj bardziej naturalnych ustawień
-        u.rate = 0.9;      // Wolniej
-        u.pitch = 1.0;     // Normalny pitch
-        u.lang = "en-US";
-        u.volume = 1.0;    // Pełna głośność
-      } else {
-        // Na desktopie używaj poprzednich ustawień
-        u.rate = 0.95;
-        u.pitch = 0.9;
-        u.lang = "en-US";
+        // Na telefonie używaj ElevenLabs przez Vercel API
+        console.log("Mobile detected - using ElevenLabs API");
+        
+        fetch("/api/narrate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text })
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.audioUrl) {
+            console.log("ElevenLabs audio received, playing on mobile");
+            const audio = new Audio(data.audioUrl);
+            audio.onended = () => resolve();
+            audio.onerror = () => {
+              console.log("ElevenLabs failed on mobile, using Web Speech fallback");
+              // Fallback na Web Speech API
+              const u = new SpeechSynthesisUtterance(text);
+              u.rate = 0.9; u.pitch = 1.0; u.lang = "en-US"; u.volume = 1.0;
+              const v = pickMale(); if (v) u.voice = v;
+              u.onend = () => resolve();
+              utterRef.current = u;
+              window.speechSynthesis.cancel();
+              setTimeout(() => window.speechSynthesis.speak(u), 100);
+            };
+            audio.play().catch(() => {
+              console.log("Audio.play() failed on mobile, using Web Speech fallback");
+              // Fallback na Web Speech API
+              const u = new SpeechSynthesisUtterance(text);
+              u.rate = 0.9; u.pitch = 1.0; u.lang = "en-US"; u.volume = 1.0;
+              const v = pickMale(); if (v) u.voice = v;
+              u.onend = () => resolve();
+              utterRef.current = u;
+              window.speechSynthesis.cancel();
+              setTimeout(() => window.speechSynthesis.speak(u), 100);
+            });
+          } else {
+            throw new Error("No audio URL received");
+          }
+        })
+        .catch(error => {
+          console.log("ElevenLabs API failed on mobile:", error);
+          // Fallback na Web Speech API
+          const u = new SpeechSynthesisUtterance(text);
+          u.rate = 0.9; u.pitch = 1.0; u.lang = "en-US"; u.volume = 1.0;
+          const v = pickMale(); if (v) u.voice = v;
+          u.onend = () => resolve();
+          utterRef.current = u;
+          window.speechSynthesis.cancel();
+          setTimeout(() => window.speechSynthesis.speak(u), 100);
+        });
+        
+        return; // Nie kontynuuj z Web Speech API na telefonie
       }
       
+      // Na desktopie używaj poprzednich ustawień (Web Speech API)
+      const u = new SpeechSynthesisUtterance(text);
+      u.rate = 0.95; u.pitch = 0.9; u.lang = "en-US";
       const v = pickMale(); 
       if (v) u.voice = v;
       
@@ -93,15 +137,7 @@ export default function usePlayback(mapApiRef: React.RefObject<any>, events: Eve
       
       // Upewnij się, że nie gada coś poprzedniego
       window.speechSynthesis.cancel();
-      
-      // Na telefonie dodaj małe opóźnienie
-      if (isMobile) {
-        setTimeout(() => {
-          window.speechSynthesis.speak(u);
-        }, 100);
-      } else {
-        window.speechSynthesis.speak(u);
-      }
+      window.speechSynthesis.speak(u);
     });
   }
 
