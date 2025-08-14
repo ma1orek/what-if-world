@@ -78,7 +78,10 @@ export default function usePlayback(mapApiRef: React.RefObject<any>, events: Eve
           if (data.audioUrl) {
             console.log("ElevenLabs audio received, playing on mobile");
             const audio = new Audio(data.audioUrl);
-            audio.onended = () => resolve();
+            audio.onended = () => {
+              console.log("ElevenLabs audio finished on mobile");
+              resolve(); // To pozwoli na auto-advance
+            };
             audio.onerror = () => {
               console.log("ElevenLabs failed on mobile, using Web Speech fallback");
               // Fallback na Web Speech API
