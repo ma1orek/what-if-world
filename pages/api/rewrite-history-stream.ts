@@ -13,22 +13,21 @@ async function generateEnhancedEvents(prompt: string) {
     if (process.env.OPENAI_API_KEY) {
       console.log("Using OpenAI for enhanced generation");
       
-      const systemPrompt = `You are an expert historian specializing in alternative history scenarios. Generate a detailed timeline of 6-8 major events that would occur if the given scenario happened.
+      const systemPrompt = `Generate alternate history timeline as NDJSON:
+1) {"type":"summary","summary":"Brief overview"}
+2) {"type":"event","year":YYYY,"title":"Event","description":"Short description","geoPoints":[[lat,lon]]}
 
-Format each event as JSON with: year, title, description, and geoPoints (latitude, longitude coordinates).
-
-Rules:
-- Use realistic years in chronological order
-- Make descriptions engaging and historically plausible
-- Include diverse geographic locations
-- End with events reaching present day (2025) or near future
-- Each event should have significant global impact
-
-Return only valid JSON array, no other text.`;
+Rules: Concise descriptions, real coordinates, one JSON per line.`;
 
       const userPrompt = `What if: "${prompt}"
 
-Generate 6-8 major events in this alternate timeline.`;
+Generate a chronological list of 6–8 major events in this alternate timeline.
+- Use real years in ascending order.
+- If the last event is before 2000, add 1–2 extra events that reach the present day (≈2025) or near future (≤2050) and describe how the world looks now as a consequence.
+- Each event: {year, title, description}. Keep descriptions concise (1–2 sentences).
+- When possible, include explicit locations in text; we will geocode them.
+- Include at least one 'op' with focus_camera to the first event.
+- If borders change, add a minimal GeoJSON polygon in geoChanges.`;
 
       const completion = await openai.chat.completions.create({
         model: process.env.OPENAI_MODEL || "gpt-4o-mini",
@@ -43,21 +42,55 @@ Generate 6-8 major events in this alternate timeline.`;
       const content = completion.choices[0]?.message?.content;
       if (content) {
         try {
-          // Try to parse the response as JSON
-          const parsed = JSON.parse(content);
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            // Transform OpenAI response to our format
-            const events = parsed.map((event: any, index: number) => ({
-              type: "event",
-              year: event.year || 1800 + index * 50,
-              title: event.title || `Event ${index + 1}`,
-              description: event.description || "A significant historical event",
-              geoPoints: event.geoPoints || [[51.5074, -0.1278]]
-            }));
-
-            // Add geo changes and ops
-            const geoChanges = [{ type: "geoChanges", geoChanges: [] }];
-            const ops = [{ type: "op", op: "focus", args: { lat: events[0].geoPoints[0][0], lon: events[0].geoPoints[0][1] } }];
+          // Parse NDJSON format (one JSON per line)
+          const lines = content.trim().split('\n');
+          const parsed = [];
+          
+          for (const line of lines) {
+            if (line.trim()) {
+              try {
+                const event = JSON.parse(line.trim());
+                if (event.type) {
+                  parsed.push(event);
+                }
+              } catch (lineError) {
+                console.log("Failed to parse line:", line);
+              }
+            }
+          }
+          
+          if (parsed.length > 0) {
+            // Separate events from other types
+            const events: any[] = [];
+            const geoChanges: any[] = [];
+            const ops: any[] = [];
+            
+            parsed.forEach((item: any) => {
+              if (item.type === "event") {
+                events.push({
+                  type: "event",
+                  year: item.year || 1800,
+                  title: item.title || "Event",
+                  description: item.description || "A significant historical event",
+                  geoPoints: item.geoPoints || [[51.5074, -0.1278]]
+                });
+              } else if (item.type === "geoChanges") {
+                geoChanges.push(item);
+              } else if (item.type === "op") {
+                ops.push(item);
+              }
+            });
+            
+            // If no ops were generated, add default ones
+            if (ops.length === 0 && events.length > 0) {
+              events.forEach((event: any) => {
+                if (event.geoPoints && event.geoPoints[0]) {
+                  const [lat, lon] = event.geoPoints[0];
+                  ops.push({ type: "op", op: "focus_camera", args: { lat, lon, scale: 2.2 } });
+                  ops.push({ type: "op", op: "place_marker", args: { lat, lon, label: event.title } });
+                }
+              });
+            }
 
             return { events, geoChanges, ops };
           }
