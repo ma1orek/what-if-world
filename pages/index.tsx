@@ -265,16 +265,17 @@ export default function Home(){
               <h2 style="color: #fff; font-size: 20px; font-weight: 600; margin-bottom: 16px;">
                 What if: ${currentPrompt.replace(/^What if\s*/i, '')}
               </h2>
-                             ${summary ? `<div style="color: #ccc; font-size: 14px; margin-bottom: 20px; font-style: italic;">
-                 ${summary}
-               </div>` : ''}
+              ${summary ? `<div style="color: #fff; font-size: 16px; margin-bottom: 24px; line-height: 1.8; padding: 20px; background: rgba(212, 170, 39, 0.1); border: 1px solid #d4aa27; border-radius: 8px;">
+                <strong style="color: #d4aa27;">Wstęp:</strong><br/>
+                ${summary}
+              </div>` : ''}
               <div style="color: #ccc; font-size: 14px; margin-bottom: 20px;">
                 ${events.length} events
               </div>
             </div>
-                         <div style="color: #ddd; line-height: 1.9; font-size: 16px;">
-               ${allEventsHTML}
-             </div>
+            <div style="color: #ddd; line-height: 1.9; font-size: 16px;">
+              ${allEventsHTML}
+            </div>
           `;
     
         modal.appendChild(header);
@@ -370,27 +371,6 @@ export default function Home(){
           <div className="map-area">
             <AnimatedMapSVG ref={mapRef} />
           </div>
-
-                     {/* Mobile Side Panel - Mobile Only */}
-           {isMobile && (
-             <div className="mobile-side-panel">
-               {/* Events list */}
-               <div className="mobile-events">
-                 {events.map((e,i)=>(
-                   <div key={e.id || i} className={`mobile-event ${i === index ? 'active' : ''}`}>
-                     <div className="event-year-title">
-                       {e.year ? `${e.year} — ` : ""}{e.title}
-                     </div>
-                     {e.description && (
-                       <div className="event-description">
-                         {e.description}
-                       </div>
-                     )}
-                   </div>
-                 ))}
-               </div>
-             </div>
-           )}
 
           {/* Side Panel - Desktop Only */}
           <aside className="side-panel">
