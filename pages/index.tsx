@@ -108,24 +108,27 @@ export default function Home(){
     scrollCardIntoView(ev.id);
   }, [index, events, isMobile]);
 
-  // Now Playing functions
-  function updateNowPlaying(ev?: { year?: number|string; title?: string; description?: string }) {
-    const root = document.getElementById("nowPlaying");
-    if (!root) return;
-    const y = root.querySelector<HTMLSpanElement>("#npYear");
-    const t = root.querySelector<HTMLSpanElement>("#npTitle");
-    const expandBtn = root.querySelector<HTMLButtonElement>("#npExpand");
-    
-    if (!ev || !y || !t || !expandBtn) { 
-      if (y) y.textContent = ""; 
-      if (t) t.textContent = ""; 
-      if (expandBtn) expandBtn.style.display = "none";
-      return; 
-    }
-    
-    y.textContent = ev.year ? `${ev.year}` : "";
-    t.textContent = ev.title || "";
-    expandBtn.style.display = "block";
+     // Now Playing functions
+   function updateNowPlaying(ev?: { year?: number|string; title?: string; description?: string }) {
+     const root = document.getElementById("nowPlaying");
+     if (!root) return;
+     const y = root.querySelector<HTMLSpanElement>("#npYear");
+     const t = root.querySelector<HTMLSpanElement>("#npTitle");
+     const d = root.querySelector<HTMLSpanElement>("#npDescription");
+     const expandBtn = root.querySelector<HTMLButtonElement>("#npExpand");
+     
+     if (!ev || !y || !t || !d || !expandBtn) { 
+       if (y) y.textContent = ""; 
+       if (t) t.textContent = ""; 
+       if (d) d.textContent = "";
+       if (expandBtn) expandBtn.style.display = "none";
+       return; 
+     }
+     
+     y.textContent = ev.year ? `${ev.year}` : "";
+     t.textContent = ev.title || "";
+     d.textContent = ev.description || "";
+     expandBtn.style.display = "block";
     
                   // Store full data for expand - create full screen modal with ALL generation content
       expandBtn.onclick = () => {
@@ -356,6 +359,7 @@ export default function Home(){
                       </div>
                     </div>
                                          <div className="generation-prompt">
+                       <div className="what-if-label">What if:</div>
                        <div className="prompt-text">{currentPrompt.replace(/^What if\s*/i, '')}</div>
                      </div>
                   </div>
@@ -367,33 +371,26 @@ export default function Home(){
             <AnimatedMapSVG ref={mapRef} />
           </div>
 
-          {/* Mobile Side Panel - Mobile Only */}
-          {isMobile && (
-            <div className="mobile-side-panel">
-              {/* Intro text - pełny summary jak w przykładzie */}
-              {summary && (
-                <div className="mobile-summary">
-                  <SummaryReveal summary={summary} />
-                </div>
-              )}
-              
-              {/* Events list */}
-              <div className="mobile-events">
-                {events.map((e,i)=>(
-                  <div key={e.id || i} className={`mobile-event ${i === index ? 'active' : ''}`}>
-                    <div className="event-year-title">
-                      {e.year ? `${e.year} — ` : ""}{e.title}
-                    </div>
-                    {e.description && (
-                      <div className="event-description">
-                        {e.description}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+                     {/* Mobile Side Panel - Mobile Only */}
+           {isMobile && (
+             <div className="mobile-side-panel">
+               {/* Events list */}
+               <div className="mobile-events">
+                 {events.map((e,i)=>(
+                   <div key={e.id || i} className={`mobile-event ${i === index ? 'active' : ''}`}>
+                     <div className="event-year-title">
+                       {e.year ? `${e.year} — ` : ""}{e.title}
+                     </div>
+                     {e.description && (
+                       <div className="event-description">
+                         {e.description}
+                       </div>
+                     )}
+                   </div>
+                 ))}
+               </div>
+             </div>
+           )}
 
           {/* Side Panel - Desktop Only */}
           <aside className="side-panel">
@@ -610,35 +607,36 @@ export default function Home(){
               </button>
           </div>
 
-          {/* Now Playing - Mobile Only */}
-          <div className="now-playing" id="nowPlaying" aria-live="polite">
-            <div className="np-content">
-              <span className="np-year" id="npYear"></span>
-              <span className="np-title" id="npTitle"></span>
-            </div>
-                         <button className="np-expand" id="npExpand" style={{
-               background: 'rgba(212, 170, 39, 0.15)',
-               border: '2px solid #d4aa27',
-               color: '#d4aa27',
-               padding: '10px 20px',
-               borderRadius: '8px',
-               fontSize: '14px',
-               fontWeight: '700',
-               cursor: 'pointer',
-               transition: 'all 0.3s ease',
-               boxShadow: '0 0 15px rgba(212, 170, 39, 0.3)',
-               textTransform: 'uppercase',
-               letterSpacing: '0.5px'
-             }} onMouseEnter={(e) => {
-               e.currentTarget.style.background = 'rgba(212, 170, 39, 0.25)';
-               e.currentTarget.style.transform = 'scale(1.05)';
-               e.currentTarget.style.boxShadow = '0 0 25px rgba(212, 170, 39, 0.5)';
-             }} onMouseLeave={(e) => {
-               e.currentTarget.style.background = 'rgba(212, 170, 39, 0.15)';
-               e.currentTarget.style.transform = 'scale(1)';
-               e.currentTarget.style.boxShadow = '0 0 15px rgba(212, 170, 39, 0.3)';
-             }}>Expand</button>
-          </div>
+                     {/* Now Playing - Mobile Only */}
+           <div className="now-playing" id="nowPlaying" aria-live="polite">
+             <div className="np-content">
+               <span className="np-year" id="npYear"></span>
+               <span className="np-title" id="npTitle"></span>
+               <span className="np-description" id="npDescription"></span>
+             </div>
+                          <button className="np-expand" id="npExpand" style={{
+                background: 'rgba(212, 170, 39, 0.15)',
+                border: '2px solid #d4aa27',
+                color: '#d4aa27',
+                padding: '10px 20px',
+                borderRadius: '8px',
+                fontSize: '14px',
+                fontWeight: '700',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease',
+                boxShadow: '0 0 15px rgba(212, 170, 39, 0.3)',
+                textTransform: 'uppercase',
+                letterSpacing: '0.5px'
+              }} onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'rgba(212, 170, 39, 0.25)';
+                e.currentTarget.style.transform = 'scale(1.05)';
+                e.currentTarget.style.boxShadow = '0 0 25px rgba(212, 170, 39, 0.5)';
+              }} onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'rgba(212, 170, 39, 0.15)';
+                e.currentTarget.style.transform = 'scale(1)';
+                e.currentTarget.style.boxShadow = '0 0 15px rgba(212, 170, 39, 0.3)';
+              }}>Expand</button>
+           </div>
         </div>
       )}
     </div>
