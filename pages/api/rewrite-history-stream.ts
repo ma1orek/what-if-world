@@ -64,9 +64,12 @@ Generate a chronological list of 6–8 major events in this alternate timeline.
             const events: any[] = [];
             const geoChanges: any[] = [];
             const ops: any[] = [];
+            let summary = `Alternative history scenario: ${prompt}`;
             
             parsed.forEach((item: any) => {
-              if (item.type === "event") {
+              if (item.type === "summary") {
+                summary = item.summary || summary;
+              } else if (item.type === "event") {
                 events.push({
                   type: "event",
                   year: item.year || 1800,
@@ -92,7 +95,7 @@ Generate a chronological list of 6–8 major events in this alternate timeline.
               });
             }
 
-            return { events, geoChanges, ops };
+            return { events, geoChanges, ops, summary };
           }
         } catch (parseError) {
           console.log("Failed to parse OpenAI response, falling back to template");
@@ -108,9 +111,11 @@ Generate a chronological list of 6–8 major events in this alternate timeline.
   const cleanPrompt = prompt.toLowerCase();
   
   let events = [];
+  let summary = `Alternative history scenario: ${prompt}`;
   
-  // Enhanced template scenarios
+  // Enhanced template scenarios with better summaries
   if (cleanPrompt.includes('roman') || cleanPrompt.includes('empire')) {
+    summary = "In this alternate timeline, the Roman Empire never falls to barbarian hordes. Instead, the Eternal City adapts, evolves, and expands, becoming the cornerstone of a civilization that spans millennia. From the ancient forums to modern skyscrapers, Rome's influence shapes every aspect of human progress.";
     events = [
       { type: "event", year: 476, title: "Rome Never Falls", description: "The Western Roman Empire survives the barbarian invasions through strategic alliances and military reforms", geoPoints: [[41.9028, 12.4964]] },
       { type: "event", year: 800, title: "Carolingian Alliance", description: "Rome and the Frankish kingdoms form a powerful alliance, creating a unified European power", geoPoints: [[48.8566, 2.3522]] },
@@ -120,7 +125,8 @@ Generate a chronological list of 6–8 major events in this alternate timeline.
       { type: "event", year: 1900, title: "Global Superpower", description: "The Roman Empire becomes the world's dominant superpower, influencing global politics and culture", geoPoints: [[38.9072, -77.0369]] },
       { type: "event", year: 2025, title: "Modern Rome", description: "Today, the Roman Empire spans six continents with advanced technology and cultural influence", geoPoints: [[41.9028, 12.4964]] }
     ];
-  } else if (cleanPrompt.includes('napoleon') || cleanPrompt.includes('waterloo')) {
+     } else if (cleanPrompt.includes('napoleon') || cleanPrompt.includes('waterloo')) {
+    summary = "In this alternate timeline, Napoleon's banners still fly over Europe. The fields of Waterloo, rather than marking his downfall, become the stage for his most brilliant triumph. Wellington's army shatters, the Prussians scatter, and the Seventh Coalition crumbles before the Emperor's relentless advance. The 19th century will unfold not in the shadow of the Congress of Vienna, but in the long, unbroken silhouette of Napoleon Bonaparte.";
     events = [
       { type: "event", year: 1815, title: "Victory at Waterloo", description: "Napoleon's tactical brilliance secures victory over the Seventh Coalition", geoPoints: [[50.6794, 4.4125]] },
       { type: "event", year: 1820, title: "Continental Dominance", description: "French empire expands across Europe, establishing French as the continent's lingua franca", geoPoints: [[48.8566, 2.3522]] },
@@ -130,6 +136,7 @@ Generate a chronological list of 6–8 major events in this alternate timeline.
       { type: "event", year: 2025, title: "French Century", description: "The 21st century is known as the French Century, with French culture and technology dominating globally", geoPoints: [[40.7128, -74.0060]] }
     ];
   } else if (cleanPrompt.includes('columbus') || cleanPrompt.includes('america')) {
+    summary = "In this alternate timeline, Columbus's voyage to the New World becomes the catalyst for a technological and cultural renaissance that transforms both continents. European settlers arrive not as conquerors, but as partners in a grand experiment of human cooperation and advancement.";
     events = [
       { type: "event", year: 1492, title: "New World Discovery", description: "Columbus reaches the Americas, but this time with advanced navigation and technology", geoPoints: [[25.7617, -80.1918]] },
       { type: "event", year: 1500, title: "Advanced Colonies", description: "European settlers arrive with advanced technology, creating prosperous cities from the start", geoPoints: [[40.7128, -74.0060]] },
@@ -139,6 +146,7 @@ Generate a chronological list of 6–8 major events in this alternate timeline.
       { type: "event", year: 2025, title: "American Century", description: "The Americas dominate global politics, economics, and culture in the 21st century", geoPoints: [[-14.2350, -51.9253]] }
     ];
   } else if (cleanPrompt.includes('ww2') || cleanPrompt.includes('world war') || cleanPrompt.includes('hitler')) {
+    summary = "In this alternate timeline, the dark clouds of fascism never gather over Europe. Hitler's rise to power is prevented, and the continent chooses a path of cooperation and progress. Without the devastation of World War II, humanity's collective energy is channeled into exploration, innovation, and the peaceful advancement of civilization.";
     events = [
       { type: "event", year: 1933, title: "Hitler Never Rises", description: "The Nazi party fails to gain power, Germany remains a democratic republic", geoPoints: [[52.5200, 13.4050]] },
       { type: "event", year: 1940, title: "European Cooperation", description: "European nations form a peaceful alliance, focusing on economic cooperation", geoPoints: [[48.8566, 2.3522]] },
@@ -148,6 +156,7 @@ Generate a chronological list of 6–8 major events in this alternate timeline.
       { type: "event", year: 2025, title: "Interstellar Era", description: "Today, humanity explores distant star systems, living in a peaceful, advanced civilization", geoPoints: [[51.5074, -0.1278]] }
     ];
   } else if (cleanPrompt.includes('cold war') || cleanPrompt.includes('soviet')) {
+    summary = "In this alternate timeline, the wartime alliance between the United States and Soviet Union endures beyond victory. Instead of descending into decades of suspicion and proxy wars, the two superpowers choose cooperation, combining their resources and expertise to advance human civilization together.";
     events = [
       { type: "event", year: 1945, title: "Allies Remain United", description: "The United States and Soviet Union maintain their wartime alliance", geoPoints: [[38.9072, -77.0369]] },
       { type: "event", year: 1950, title: "Global Cooperation", description: "World powers focus on rebuilding and advancing technology together", geoPoints: [[55.7558, 37.6176]] },
@@ -158,6 +167,7 @@ Generate a chronological list of 6–8 major events in this alternate timeline.
     ];
   } else {
     // Generic alternative history with more variety
+    summary = "In this alternate timeline, history takes an unexpected turn, creating ripples that transform the world we know into something entirely different. A single moment of change cascades through centuries, reshaping nations, cultures, and the very fabric of human civilization.";
     events = [
       { type: "event", year: 1800, title: "Alternative Timeline Begins", description: "History takes a different turn, creating a new path for humanity", geoPoints: [[51.5074, -0.1278]] },
       { type: "event", year: 1850, title: "Major Change Occurs", description: "A pivotal moment changes everything, setting the course for a new future", geoPoints: [[48.8566, 2.3522]] },
@@ -178,7 +188,7 @@ Generate a chronological list of 6–8 major events in this alternate timeline.
     { type: "op", op: "focus", args: { lat: events[0].geoPoints[0][0], lon: events[0].geoPoints[0][1] } }
   ];
 
-  return { events, geoChanges, ops };
+  return { events, geoChanges, ops, summary };
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -200,10 +210,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   res.setHeader('Access-Control-Allow-Headers', 'Cache-Control');
 
   // Generate enhanced content based on prompt
-  const { events, geoChanges, ops } = await generateEnhancedEvents(prompt);
+  const { events, geoChanges, ops, summary } = await generateEnhancedEvents(prompt);
 
   // Send initial summary
-  res.write(`data: ${JSON.stringify({ type: "summary", summary: `Alternative history scenario: ${prompt}` })}\n\n`);
+  res.write(`data: ${JSON.stringify({ type: "summary", summary })}\n\n`);
 
   // Send events with realistic timing
   for (let i = 0; i < events.length; i++) {
