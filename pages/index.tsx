@@ -356,7 +356,8 @@ export default function Home(){
                       </div>
                     </div>
                     <div className="generation-prompt">
-                      {currentPrompt.replace(/^What if\s*/i, '')}
+                      <div className="what-if-label">What if:</div>
+                      <div className="prompt-text">{currentPrompt.replace(/^What if\s*/i, '')}</div>
                     </div>
                   </div>
                 </div>
@@ -366,6 +367,38 @@ export default function Home(){
           <div className="map-area">
             <AnimatedMapSVG ref={mapRef} />
           </div>
+
+          {/* Mobile Side Panel - Mobile Only */}
+          {isMobile && (
+            <div className="mobile-side-panel">
+              <h1 className="mobile-title">
+                What if: {currentPrompt.replace(/^What if\s*/i, '')}
+              </h1>
+              
+              {/* Intro text */}
+              {summary && (
+                <div className="mobile-summary">
+                  <SummaryReveal summary={summary} />
+                </div>
+              )}
+              
+              {/* Events list */}
+              <div className="mobile-events">
+                {events.map((e,i)=>(
+                  <div key={e.id || i} className={`mobile-event ${i === index ? 'active' : ''}`}>
+                    <div className="event-year-title">
+                      {e.year ? `${e.year} — ` : ""}{e.title}
+                    </div>
+                    {e.description && (
+                      <div className="event-description">
+                        {e.description}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Side Panel - Desktop Only */}
           <aside className="side-panel">

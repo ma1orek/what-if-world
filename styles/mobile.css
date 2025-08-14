@@ -18,6 +18,11 @@
     border-bottom: 1px solid #161616;
   }
 
+  /* Mobile map area - mniejsza wysokość żeby zostawić miejsce na side-panel */
+  .mobile-layout .map-area {
+    height: 68vh; /* 68% wysokości ekranu */
+  }
+
   /* Header (strzałka + logo) nad mapą */
   .app-header {
     position: absolute;
