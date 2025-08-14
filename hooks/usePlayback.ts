@@ -177,7 +177,7 @@ export default function usePlayback(mapApiRef: React.RefObject<any>, events: Eve
     markerIdsRef.current = [];
     lastActiveIdRef.current = null;
     eventsRef.current = [];
-    setIndex(0);
+    setIndex(-1); // Ustaw index na -1 od razu żeby intro było pokazywane od początku
     setPlaying(false);
     if (mapApiRef.current){
       mapApiRef.current.clearLinks();
