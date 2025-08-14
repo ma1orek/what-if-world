@@ -36,7 +36,7 @@ Type a "What if...?" question, and our AI engine generates:
 - **Deployment**: CI/CD via GitHub
 
 ## 🤖 How I Used Kiro
-**Bartosz Idzik** (@[bartosz-idzik-97770098](https://www.linkedin.com/in/bartosz-idzik-97770098/)) integrated **Kiro** in multiple ways during the hackathon:
+I integrated **Kiro** in multiple ways during the hackathon:
 
 ### **Spec-to-Code Integration**
 - Generated UI components and API route stubs directly from feature specifications
