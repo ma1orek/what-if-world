@@ -88,7 +88,7 @@ NEXT_PUBLIC_SITE_URL=https://www.whatify.world
 
 ## 🧪 Live Project Testing
 
-**Live Application**: [https://www.whatify.world](https://www.whatify.world)
+**Live App**: [https://www.whatify.world](https://www.whatify.world)
 
 ### **How to Experience the Full Project:**
 
@@ -172,7 +172,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 📞 Contact
 - **Creator**: [Bartosz Idzik](https://www.linkedin.com/in/bartosz-idzik-97770098/) - LinkedIn
 - **Project Link**: https://github.com/ma1orek/what-if-world
-- **Live Application**: [https://www.whatify.world](https://www.whatify.world)
+- **Live App**: [https://www.whatify.world](https://www.whatify.world)
 - **Hackathon**: Built for Kiro Hackathon 2025
 
 ---
