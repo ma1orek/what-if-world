@@ -61,6 +61,9 @@ export default function usePlayback(mapApiRef: React.RefObject<any>, events: Eve
     
     phaseRef.current = "intro";
     
+    // Ustaw index na -1 gdy narrator czyta intro
+    setIndex(-1);
+    
     // Odtwórz intro summary jeśli istnieje
     if (summary && summary.trim()) {
       await speak(summary);
