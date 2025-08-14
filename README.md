@@ -36,7 +36,7 @@ Type a "What if...?" question, and our AI engine generates:
 - **Deployment**: CI/CD via GitHub
 
 ## 🤖 How We Used Kiro
-We integrated **Kiro** in multiple ways during the hackathon:
+**Bartosz Idzik** (@[bartosz-idzik-97770098](https://www.linkedin.com/in/bartosz-idzik-97770098/)) integrated **Kiro** in multiple ways during the hackathon:
 
 ### **Spec-to-Code Integration**
 - Generated UI components and API route stubs directly from feature specifications
@@ -46,7 +46,7 @@ We integrated **Kiro** in multiple ways during the hackathon:
 ### **Rapid Prototyping**
 - Leveraged Kiro's AI agents for rapid code generation and iteration
 - Used vibe coding to refine user experience and interactions
-- Integrated Kiro workflow into our development pipeline
+- Integrated Kiro workflow into development pipeline
 
 The `.kiro/` folder in this repo contains:
 - Agent sessions and context
@@ -168,6 +168,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **D3.js & Three.js** communities for mapping libraries
 
 ## 📞 Contact
+- **Creator**: [Bartosz Idzik](https://www.linkedin.com/in/bartosz-idzik-97770098/) - LinkedIn
 - **Project Link**: https://github.com/ma1orek/what-if-world
 - **Live Demo**: https://www.whatify.world
 - **Hackathon**: Built for Kiro Hackathon 2025
