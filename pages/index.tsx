@@ -262,7 +262,7 @@ export default function Home(){
       
                                    // Show content based on what narrator is reading
         if (index === -1) {
-          // Narrator czyta wstęp - pokaż tylko wstęp
+          // Narrator czyta wstęp - pokaż summary w żółtej ramce
           content.innerHTML = `
             <div style="margin-bottom: 24px; text-align: center;">
               <h2 style="color: #fff; font-size: 20px; font-weight: 600; margin-bottom: 16px;">
@@ -271,11 +271,11 @@ export default function Home(){
               ${summary ? `<div style="color: #fff; font-size: 16px; margin-bottom: 24px; line-height: 1.8; padding: 20px; background: rgba(212, 170, 39, 0.1); border: 1px solid #d4aa27; border-radius: 8px;">
                 <strong style="color: #d4aa27;">Wstęp:</strong><br/>
                 ${summary}
-              </div>` : ''}
+              </div>` : '<div style="color: #ccc; font-size: 16px; margin-bottom: 24px; text-align: center;">Generowanie wstępu...</div>'}
             </div>
           `;
         } else {
-          // Narrator czyta wydarzenie - pokaż wstęp + wydarzenia
+          // Narrator czyta wydarzenie - pokaż summary + wydarzenia
           content.innerHTML = `
             <div style="margin-bottom: 24px; text-align: center;">
               <h2 style="color: #fff; font-size: 20px; font-weight: 600; margin-bottom: 16px;">
@@ -313,8 +313,15 @@ export default function Home(){
 
   // Update Now Playing on active event change
   useEffect(() => {
+    // Czekaj aż summary i events są załadowane
+    if (!summary && events.length === 0) {
+      // Jeszcze się generuje - nie pokazuj nic
+      updateNowPlaying(undefined);
+      return;
+    }
+
     if (index === -1) {
-      // Narrator czyta wstęp - pokaż wstęp w EXPAND boxie
+      // Narrator czyta wstęp - pokaż summary w EXPAND boxie
       updateNowPlaying({ 
         year: "Wstęp", 
         title: "Alternatywna Historia", 
