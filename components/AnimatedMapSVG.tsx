@@ -286,9 +286,9 @@ const AnimatedMapSVG = forwardRef<MapAPI, {}>(function AnimatedMapSVG(_props, re
   useEffect(() => {
     const handleMapFocus = (e: any) => {
       const { lat, lon, zoom = 3.6, duration = 900 } = e.detail || {};
-      if (lat != null && lon != null) {
+      if (lat != null && lon != null && ref.current) {
         // Use the focus API
-        api.focus(lat, lon, zoom);
+        ref.current.focus(lat, lon, zoom);
       }
     };
     
