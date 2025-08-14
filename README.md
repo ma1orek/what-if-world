@@ -35,7 +35,7 @@ Type a "What if...?" question, and our AI engine generates:
 - **Domain**: whatify.world
 - **Deployment**: CI/CD via GitHub
 
-## 🤖 How We Used Kiro
+## 🤖 How I Used Kiro
 **Bartosz Idzik** (@[bartosz-idzik-97770098](https://www.linkedin.com/in/bartosz-idzik-97770098/)) integrated **Kiro** in multiple ways during the hackathon:
 
 ### **Spec-to-Code Integration**
