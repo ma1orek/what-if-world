@@ -321,14 +321,14 @@ export default function Home(){
     }
 
     if (index === -1) {
-      // Narrator czyta wstęp - pokaż summary w EXPAND boxie
+      // Narrator czyta wstęp - pokaż summary w Now Playing boxie na dole
       updateNowPlaying({ 
-        year: "Wstęp", 
-        title: "Alternatywna Historia", 
-        description: summary || "Generowanie wstępu..." 
+        year: "Intro", 
+        title: "Alternative History", 
+        description: summary || "Generating intro..." 
       });
     } else {
-      // Narrator czyta wydarzenie - pokaż wydarzenie w EXPAND boxie
+      // Narrator czyta wydarzenie - pokaż wydarzenie w Now Playing boxie na dole
       const ev = events[index];
       updateNowPlaying(ev);
     }
