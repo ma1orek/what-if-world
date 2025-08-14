@@ -308,7 +308,8 @@ const AnimatedMap: React.FC<AnimatedMapProps> = ({
       
       // Create pulsing point for active event
       if (index === activeEventIndex) {
-        createPulsingPoint(position, 0xd4af37, pointsGroupRef.current!);
+        const pulsingPoint = createPulsingPoint(position, 0xd4af37, sceneRef.current!);
+        pointsGroupRef.current?.add(pulsingPoint);
       } else {
         // Create static point for inactive events
         const geometry = new THREE.SphereGeometry(0.8, 12, 12);

@@ -1,8 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  experimental: {
-    appDir: false, // Using pages directory for this project
-  },
   webpack: (config) => {
     // Handle Three.js and other 3D libraries
     config.module.rules.push({
