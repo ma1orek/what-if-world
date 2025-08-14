@@ -30,7 +30,7 @@ export default function TestSVG() {
         <title>Test SVG Map</title>
       </Head>
       <main className="w-full h-screen bg-slate-900">
-        <AnimatedMapSVG scenario={scenario} />
+        <AnimatedMapSVG />
       </main>
     </>
   );

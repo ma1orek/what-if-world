@@ -1,0 +1,3 @@
+[33m1ca489f[m[33m ([m[1;36mHEAD -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m Fix api.focus error - use ref.current.focus instead
+[33m4927af4[m Fix TypeScript errors in AnimatedMapSVG - add null checks for projectionRef.current
+[33ma7898f2[m Fix TypeScript error in AnimatedMap and remove deprecated next.config.js options

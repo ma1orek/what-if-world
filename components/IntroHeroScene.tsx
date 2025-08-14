@@ -53,8 +53,11 @@ export default function IntroHeroScene(){
       // ładne miasta na intro
       const cities = [[48.8566,2.3522],[51.5074,-0.1278],[41.9028,12.4964],[40.7128,-74.0060],[35.6762,139.6503]];
       cities.forEach(([lat,lon])=>{
-        const [x,y] = projection([lon,lat]);
-        svg.append("circle").attr("cx",x).attr("cy",y).attr("r",2.8).attr("fill","var(--accent)").attr("opacity",.65);
+        const xy = projection([lon,lat]);
+        if (xy) {
+          const [x,y] = xy;
+          svg.append("circle").attr("cx",x).attr("cy",y).attr("r",2.8).attr("fill","var(--accent)").attr("opacity",.65);
+        }
       });
 
       svg.attr("opacity", .55); // delikatnie w tle

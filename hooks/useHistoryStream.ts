@@ -38,7 +38,7 @@ export default function useHistoryStream(prompt?: string | null) {
     
     console.log("=== STARTING FETCH STREAM ===");
     
-    fetch(`http://localhost:3002/api/rewrite-history-stream?prompt=${encodeURIComponent(cleanPrompt)}&t=${timestamp}`, {
+    fetch(`/api/rewrite-history-stream?prompt=${encodeURIComponent(cleanPrompt)}&t=${timestamp}`, {
       method: 'GET',
       headers: {
         'Accept': 'text/event-stream',
@@ -60,7 +60,7 @@ export default function useHistoryStream(prompt?: string | null) {
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
       
-      function readStream() {
+      function readStream(): Promise<void> {
         return reader.read().then(({ done, value }) => {
           if (done) {
             console.log("=== STREAM COMPLETED ===");

@@ -125,7 +125,7 @@ export function useMapAnimation({
     const targetPos = targetPosition;
     
     // Create path points for smooth animation
-    const pathPoints = [];
+    const pathPoints: THREE.Vector3[] = [];
     const steps = 20;
     
     for (let i = 0; i <= steps; i++) {

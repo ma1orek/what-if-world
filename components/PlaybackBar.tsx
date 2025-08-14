@@ -1,4 +1,17 @@
-export default function PlaybackBar({ playing, index, total, muted, onPlay, onPause, onNext, onPrev, onRestart, onToggleMute }){
+interface PlaybackBarProps {
+  playing: boolean;
+  index: number;
+  total: number;
+  muted: boolean;
+  onPlay: () => void;
+  onPause: () => void;
+  onNext: () => void;
+  onPrev: () => void;
+  onRestart: () => void;
+  onToggleMute: () => void;
+}
+
+export default function PlaybackBar({ playing, index, total, muted, onPlay, onPause, onNext, onPrev, onRestart, onToggleMute }: PlaybackBarProps){
   return (
     <div className="absolute bottom-5 left-6 right-[460px] flex items-center justify-between glass rounded-[12px] px-4 py-3">
       <div className="text-sm opacity-70">{Math.min(index+1,total)}/{total||0}</div>

@@ -286,7 +286,7 @@ const AnimatedMapSVG = forwardRef<MapAPI, {}>(function AnimatedMapSVG(_props, re
   useEffect(() => {
     const handleMapFocus = (e: any) => {
       const { lat, lon, zoom = 3.6, duration = 900 } = e.detail || {};
-      if (lat != null && lon != null && ref.current) {
+      if (lat != null && lon != null && ref && typeof ref === 'object' && ref.current) {
         // Use the focus API
         ref.current.focus(lat, lon, zoom);
       }
@@ -294,7 +294,7 @@ const AnimatedMapSVG = forwardRef<MapAPI, {}>(function AnimatedMapSVG(_props, re
     
     window.addEventListener("MAP_FOCUS", handleMapFocus as EventListener);
     return () => window.removeEventListener("MAP_FOCUS", handleMapFocus as EventListener);
-  }, []);
+  }, [ref]);
 
   return <svg ref={svgRef} className="absolute inset-0 w-full h-full" />;
 });

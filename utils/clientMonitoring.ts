@@ -11,6 +11,9 @@ export interface ClientError {
   userAgent: string;
   userId?: string;
   context?: Record<string, any>;
+  line?: number;
+  column?: number;
+  type?: string;
 }
 
 export interface PerformanceMetric {
