@@ -260,7 +260,10 @@ export default function Home(){
           </div>
         `).join('');
       
-                                   content.innerHTML = `
+                                   // Show content based on what narrator is reading
+        if (index === -1) {
+          // Narrator czyta wstęp - pokaż tylko wstęp
+          content.innerHTML = `
             <div style="margin-bottom: 24px; text-align: center;">
               <h2 style="color: #fff; font-size: 20px; font-weight: 600; margin-bottom: 16px;">
                 What if: ${currentPrompt.replace(/^What if\s*/i, '')}
@@ -269,7 +272,20 @@ export default function Home(){
                 <strong style="color: #d4aa27;">Wstęp:</strong><br/>
                 ${summary}
               </div>` : ''}
-              ${index >= 0 ? `<div style="color: #ccc; font-size: 14px; margin-bottom: 20px;">
+            </div>
+          `;
+        } else {
+          // Narrator czyta wydarzenie - pokaż wstęp + wydarzenia
+          content.innerHTML = `
+            <div style="margin-bottom: 24px; text-align: center;">
+              <h2 style="color: #fff; font-size: 20px; font-weight: 600; margin-bottom: 16px;">
+                What if: ${currentPrompt.replace(/^What if\s*/i, '')}
+              </h2>
+              ${summary ? `<div style="color: #fff; font-size: 16px; margin-bottom: 24px; line-height: 1.8; padding: 20px; background: rgba(212, 170, 39, 0.1); border: 1px solid #d4aa27; border-radius: 8px;">
+                <strong style="color: #d4aa27;">Wstęp:</strong><br/>
+                ${summary}
+              </div>` : ''}
+              ${events.length > 0 ? `<div style="color: #ccc; font-size: 14px; margin-bottom: 20px;">
                 ${events.length} events
               </div>
               <div style="color: #ddd; line-height: 1.9; font-size: 16px;">
@@ -277,6 +293,7 @@ export default function Home(){
               </div>` : ''}
             </div>
           `;
+        }
     
         modal.appendChild(header);
         modal.appendChild(content);
