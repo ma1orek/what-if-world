@@ -102,7 +102,7 @@ const AnimatedMapSVG = forwardRef<MapAPI, {}>(function AnimatedMapSVG(_props, re
 
   const toXY = (lat:number, lon:number):[number,number]|null => {
     if (!projectionRef.current) return null;
-    return projectionRef.current!([lon,lat]) as [number,number];
+    return projectionRef.current([lon,lat]) as [number,number];
   };
 
   /** Bezier między dwoma punktami z lekkim łukiem */
@@ -221,8 +221,14 @@ const AnimatedMapSVG = forwardRef<MapAPI, {}>(function AnimatedMapSVG(_props, re
       if (!from || !to) return;
 
       // znajdź oryginalne lon/lat markerów z rzutowania wstecznego
-      const lonlatFrom = projectionRef.current!.invert([from.x, from.y]) as [number,number];
-      const lonlatTo = projectionRef.current!.invert([to.x, to.y]) as [number,number];
+      const proj = projectionRef.current;
+      if (!proj || !proj.invert) {
+        // projection jeszcze się nie zainicjalizował albo nie ma invert
+        return;
+      }
+      
+      const lonlatFrom = proj.invert([from.x, from.y]) as [number,number];
+      const lonlatTo = proj.invert([to.x, to.y]) as [number,number];
 
       let use = opts?.mode ?? (opts?.geodesic ? "geodesic" : "auto");
       if (use === "auto") use = pickArcMode(lonlatFrom, lonlatTo); // "bezier" | "geodesic"
@@ -255,7 +261,7 @@ const AnimatedMapSVG = forwardRef<MapAPI, {}>(function AnimatedMapSVG(_props, re
 
     highlight: (geo) => {
       if (!gRef.current || !projectionRef.current) return;
-      const path = d3.geoPath(projectionRef.current!);
+      const path = d3.geoPath(projectionRef.current);
       d3.select(gRef.current).select("g.changes").append("path")
         .attr("d", (path as any)(geo))
         .attr("fill","rgba(212,175,55,.06)")
