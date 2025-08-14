@@ -108,6 +108,16 @@ export default function Home(){
     scrollCardIntoView(ev.id);
   }, [index, events, isMobile]);
 
+  // Scroll to top when generation completes
+  useEffect(() => {
+    if (summary && events.length > 0) {
+      // Generacja się skończyła - scroll do góry żeby widać było PLAY button
+      setTimeout(() => {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }, 500);
+    }
+  }, [summary, events]);
+
      // Now Playing functions
    function updateNowPlaying(ev?: { year?: number|string; title?: string; description?: string }) {
      const root = document.getElementById("nowPlaying");

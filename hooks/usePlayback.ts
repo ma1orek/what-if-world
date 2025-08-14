@@ -297,15 +297,16 @@ export default function usePlayback(mapApiRef: React.RefObject<any>, events: Eve
     }
   }
 
-  // Auto-start gdy mamy summary i events - NAPRAWIONE
+  // Auto-start gdy mamy summary i events - WYŁĄCZONE
   useEffect(() => {
-    if (summary && events.length > 0 && !startedRef.current) {
-      console.log("Auto-starting playIntroThenEvents with summary:", summary, "events:", events.length);
-      setTimeout(() => {
-        console.log("Calling playIntroThenEvents after timeout");
-        playIntroThenEvents();
-      }, 1000);
-    }
+    // NIE auto-startuj - użytkownik musi ręcznie włączyć PLAY
+    // if (summary && events.length > 0 && !startedRef.current) {
+    //   console.log("Auto-starting playIntroThenEvents with summary:", summary, "events:", events.length);
+    //   setTimeout(() => {
+    //     console.log("Calling playIntroThenEvents after timeout");
+    //     playIntroThenEvents();
+    //   }, 1000);
+    // }
   }, [summary, events]);
 
   return { 
