@@ -269,12 +269,12 @@ export default function Home(){
                 <strong style="color: #d4aa27;">Wstęp:</strong><br/>
                 ${summary}
               </div>` : ''}
-              <div style="color: #ccc; font-size: 14px; margin-bottom: 20px;">
+              ${index >= 0 ? `<div style="color: #ccc; font-size: 14px; margin-bottom: 20px;">
                 ${events.length} events
               </div>
-            </div>
-            <div style="color: #ddd; line-height: 1.9; font-size: 16px;">
-              ${allEventsHTML}
+              <div style="color: #ddd; line-height: 1.9; font-size: 16px;">
+                ${allEventsHTML}
+              </div>` : ''}
             </div>
           `;
     
@@ -296,9 +296,19 @@ export default function Home(){
 
   // Update Now Playing on active event change
   useEffect(() => {
-    const ev = events[index];
-    updateNowPlaying(ev);
-  }, [index, events]);
+    if (index === -1) {
+      // Narrator czyta wstęp - pokaż wstęp w EXPAND boxie
+      updateNowPlaying({ 
+        year: "Wstęp", 
+        title: "Alternatywna Historia", 
+        description: summary || "Generowanie wstępu..." 
+      });
+    } else {
+      // Narrator czyta wydarzenie - pokaż wydarzenie w EXPAND boxie
+      const ev = events[index];
+      updateNowPlaying(ev);
+    }
+  }, [index, events, summary]);
 
   // Cleanup on unmount
   useEffect(() => () => updateNowPlaying(undefined), []);
