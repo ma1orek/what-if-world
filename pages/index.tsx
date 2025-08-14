@@ -355,10 +355,9 @@ export default function Home(){
                         <span></span><span></span><span></span>
                       </div>
                     </div>
-                    <div className="generation-prompt">
-                      <div className="what-if-label">What if:</div>
-                      <div className="prompt-text">{currentPrompt.replace(/^What if\s*/i, '')}</div>
-                    </div>
+                                         <div className="generation-prompt">
+                       <div className="prompt-text">{currentPrompt.replace(/^What if\s*/i, '')}</div>
+                     </div>
                   </div>
                 </div>
               )}
@@ -371,11 +370,7 @@ export default function Home(){
           {/* Mobile Side Panel - Mobile Only */}
           {isMobile && (
             <div className="mobile-side-panel">
-              <h1 className="mobile-title">
-                What if: {currentPrompt.replace(/^What if\s*/i, '')}
-              </h1>
-              
-              {/* Intro text */}
+              {/* Intro text - pełny summary jak w przykładzie */}
               {summary && (
                 <div className="mobile-summary">
                   <SummaryReveal summary={summary} />
