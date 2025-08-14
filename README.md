@@ -1,108 +1,177 @@
-# History Rewriter Live - Awwwards Edition
+# Whatify 🌍 — AI-Powered Alternate History Timeline Generator
 
-An interactive web application where users propose alternate history scenarios, and AI generates cinematic maps, timelines, narration, and illustrations in real-time.
+> Rewrite pivotal moments in history and watch an alternate timeline unfold on an interactive world map — narrated by AI.
 
-## 🚀 Features
+![Whatify Demo Screenshot](./public/og/og-image.jpg)
 
-- **Cinematic Intro**: Fullscreen experience with fade-in animations
-- **Interactive Input**: Propose "What if..." scenarios with example prompts
-- **3D Animated Maps**: Three.js powered world map with morphing borders
-- **Synchronized Timeline**: Vertical timeline that syncs with audio narration
-- **AI-Generated Content**: OpenAI integration for historical scenarios
-- **Voice Narration**: ElevenLabs TTS for documentary-style audio
-- **Awwwards-Style Animations**: GSAP powered smooth transitions
+## 🚀 Overview
+**Whatify** is an AI-powered platform that lets you explore alternate histories.  
+Type a "What if...?" question, and our AI engine generates:
+- A branching historical timeline
+- An interactive map showing ripple effects across the world
+- Optional AI narration for immersive storytelling
 
-## 🛠️ Tech Stack
+**Example prompts:**
+- *What if the Roman Empire never fell?*
+- *What if Napoleon won at Waterloo?*
+- *What if the Cold War turned hot in 1962?*
+- *What if humans colonized Mars in the 1980s?*
 
-### Frontend
-- **Next.js 14** - React framework with TypeScript
-- **Three.js** - 3D graphics and map rendering
-- **GSAP** - Professional animations
-- **D3.js** - Data visualization and geographic transformations
-- **Tailwind CSS** - Utility-first styling
+## ✨ Features
+- **AI-Generated Narratives**: OpenAI-powered alternate history scenarios
+- **Interactive World Map**: D3.js + Three.js visualization with geographic transformations
+- **Timeline Events**: Chronological list of key events and outcomes
+- **Voice Narration**: AI voice-over for immersive storytelling experience
+- **Mobile-First Design**: Responsive UI optimized for all devices
+- **Shareable Scenarios**: Unique links for each generated timeline
 
-### Backend
-- **Express.js** - Node.js web framework
-- **OpenAI API** - GPT-4 for historical scenario generation
-- **ElevenLabs API** - Text-to-speech narration
+## 🛠 Tech Stack
+- **Frontend**: Next.js 14 + React + TypeScript + TailwindCSS
+- **Backend**: Next.js API Routes + OpenAI API
+- **AI**: OpenAI GPT-4 for content generation
+- **Maps**: D3.js + Three.js + GSAP animations
+- **Voice**: Web Speech API for narration
+- **Hosting**: Vercel
+- **Domain**: whatify.world
+- **Deployment**: CI/CD via GitHub
+
+## 🤖 How We Used Kiro
+We integrated **Kiro** in multiple ways during the hackathon:
+
+### **Spec-to-Code Integration**
+- Generated UI components and API route stubs directly from feature specifications
+- Used Kiro agents to iterate on map interactions and animation code
+- Built core gameplay loop (prompt → AI → map render) in under 48h
+
+### **Rapid Prototyping**
+- Leveraged Kiro's AI agents for rapid code generation and iteration
+- Used vibe coding to refine user experience and interactions
+- Integrated Kiro workflow into our development pipeline
+
+The `.kiro/` folder in this repo contains:
+- Agent sessions and context
+- Feature specifications
+- Generated code artifacts
+- Development workflow documentation
 
 ## 📦 Installation
 
-1. **Clone and install dependencies:**
+### Prerequisites
+- Node.js >= 18
+- npm or yarn
+- OpenAI API key
+
+### Quick Start
 ```bash
+# Clone repository
+git clone https://github.com/ma1orek/what-if-world.git
+cd what-if-world
+
+# Install dependencies
 npm install
-```
 
-2. **Set up environment variables:**
-```bash
-cp .env.example .env
-```
+# Configure environment variables
+cp .env.example .env.local
+# Add your OPENAI_API_KEY
 
-Edit `.env` with your API keys:
-- `OPENAI_API_KEY` - Your OpenAI API key
-- `ELEVENLABS_API_KEY` - Your ElevenLabs API key
-
-3. **Start development servers:**
-
-Frontend (Next.js):
-```bash
+# Run development server
 npm run dev
+
+# Open http://localhost:3000
 ```
 
-Backend (Express):
+### Environment Variables
 ```bash
-npm run dev:server
+OPENAI_API_KEY=your_openai_api_key_here
+NEXT_PUBLIC_SITE_URL=https://www.whatify.world
 ```
 
-4. **Open the application:**
-- Frontend: http://localhost:3000
-- Backend API: http://localhost:3001
+## 🧪 Testing Instructions for Hackathon Judges
 
-## 🧪 Testing
+**Live Demo**: https://www.whatify.world
 
-Run the test suite:
-```bash
-npm test
+### **How to Test:**
+
+1. **Open the application** at the link above
+2. **Enter a historical "What if..." prompt** (examples provided on homepage)
+3. **Wait for AI generation** (usually 10-30 seconds)
+4. **Explore the interactive timeline** and world map
+5. **Enable narration** to hear AI voice-over
+6. **Navigate through events** using playback controls
+
+### **No Login Required**
+- Completely public demo
+- No authentication barriers
+- Instant access to all features
+
+### **Example Test Scenarios**
+- "What if the Roman Empire never fell?"
+- "What if Napoleon won at Waterloo?"
+- "What if the Cold War turned hot in 1962?"
+- "What if humans colonized Mars in the 1980s?"
+
+## 🏗 Project Structure
 ```
-
-Run tests in watch mode:
-```bash
-npm run test:watch
-```
-
-## 📁 Project Structure
-
-```
-history-rewriter-live/
+whatify-world/
 ├── components/          # React components
+│   ├── AnimatedMapSVG.tsx    # Interactive world map
+│   ├── Timeline.tsx          # Event timeline display
+│   └── Narration.tsx         # Voice narration controls
 ├── hooks/              # Custom React hooks
+│   ├── useHistoryStream.ts   # AI content streaming
+│   ├── useMapAnimation.ts    # Map animations
+│   └── usePlayback.ts        # Playback controls
 ├── pages/              # Next.js pages
-├── server/             # Express.js backend
-├── styles/             # Global styles
-├── types/              # TypeScript type definitions
-├── utils/              # Utility functions
-└── public/             # Static assets
+│   ├── api/            # API routes
+│   └── index.tsx       # Main application
+├── public/             # Static assets
+│   ├── data/           # Geographic data
+│   └── og/             # Open Graph images
+└── styles/             # CSS and styling
 ```
 
-## 🎯 Usage
+## 🚀 Deployment
 
-1. **Launch the app** and watch the cinematic intro
-2. **Enter a "What if..." scenario** or click an example prompt
-3. **Watch the magic happen** as AI generates:
-   - Alternative history summary
-   - Interactive timeline of events
-   - Morphing world map with border changes
-   - Documentary-style narration
+### **Vercel (Recommended)**
+```bash
+# Connect your GitHub repo to Vercel
+# Add environment variables in Vercel dashboard
+# Deploy automatically on push to main branch
+```
 
-## 🔧 Development
+### **Manual Deployment**
+```bash
+npm run build
+npm start
+```
 
-The project follows a spec-driven development approach with:
-- Detailed requirements documentation
-- Comprehensive design specifications
-- Step-by-step implementation tasks
+## 📱 Browser Support
+- Chrome 90+
+- Firefox 88+
+- Safari 14+
+- Edge 90+
 
-See `.kiro/specs/history-rewriter-live/` for complete specifications.
+## 🤝 Contributing
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
 ## 📄 License
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-This project is for educational and demonstration purposes.
+## 🙏 Acknowledgments
+- **Kiro Team** for the amazing AI-powered development tools
+- **OpenAI** for GPT-4 API access
+- **Vercel** for hosting and deployment
+- **D3.js & Three.js** communities for mapping libraries
+
+## 📞 Contact
+- **Project Link**: https://github.com/ma1orek/what-if-world
+- **Live Demo**: https://www.whatify.world
+- **Hackathon**: Built for Kiro Hackathon 2025
+
+---
+
+**Built with ❤️ during the Kiro Hackathon 2025**

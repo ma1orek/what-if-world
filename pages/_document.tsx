@@ -4,6 +4,11 @@ export default function Document() {
   return (
     <Html lang="en">
       <Head>
+        {/* Critical SEO Meta Tags */}
+        <title>Whatify — AI-Powered Alternate History Timeline Generator</title>
+        <meta name="description" content="Rewrite pivotal moments in history and watch an alternate timeline unfold on an interactive world map — narrated by AI." />
+        <link rel="canonical" href="https://www.whatify.world/" />
+        
         {/* Preload critical fonts */}
         <link
           rel="preload"
@@ -12,8 +17,8 @@ export default function Document() {
         />
         
         {/* Meta tags for better SEO and performance */}
-        <meta name="theme-color" content="#0A0A0A" />
-        <meta name="msapplication-TileColor" content="#0A0A0A" />
+        <meta name="theme-color" content="#000000" />
+        <meta name="msapplication-TileColor" content="#000000" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         
@@ -21,23 +26,31 @@ export default function Document() {
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         
-        {/* Favicon and app icons */}
-        <link rel="icon" type="image/x-icon" href="/favicon.ico" />
-        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
-        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+        {/* Favicons - Complete Setup */}
+        <link rel="icon" href="/favicon.ico" sizes="any" />
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        <link rel="manifest" href="/site.webmanifest" />
         
-        {/* Open Graph meta tags */}
+        {/* Open Graph Meta Tags */}
         <meta property="og:type" content="website" />
-        <meta property="og:title" content="History Rewriter Live - Awwwards Edition" />
-        <meta property="og:description" content="Interactive alternate history scenarios with AI-generated maps, timelines, and narration" />
-        <meta property="og:image" content="/og-image.jpg" />
+        <meta property="og:url" content="https://www.whatify.world/" />
+        <meta property="og:site_name" content="Whatify" />
+        <meta property="og:title" content="Whatify — AI-Powered Alternate History Timeline Generator" />
+        <meta property="og:description" content="Explore alternate histories with AI: change key events and see the ripple effects on an interactive, narrated world map." />
+        <meta property="og:image" content="https://www.whatify.world/og/og-image.jpg" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:locale" content="en_US" />
         
-        {/* Twitter Card meta tags */}
+        {/* Twitter Card Meta Tags */}
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="History Rewriter Live" />
-        <meta name="twitter:description" content="Rewrite history with AI-powered interactive scenarios" />
-        <meta name="twitter:image" content="/twitter-image.jpg" />
+        <meta name="twitter:title" content="Whatify — AI-Powered Alternate History Timeline Generator" />
+        <meta name="twitter:description" content="Rewrite history and visualize alternate timelines on an interactive, narrated world map." />
+        <meta name="twitter:image" content="https://www.whatify.world/og/og-image.jpg" />
+        
+        {/* SEO Keywords - Example "What if?" tags */}
+        <meta name="keywords" content="alternate history, AI history generator, what if scenarios, historical simulations, the Roman Empire never fell, Napoleon won at Waterloo, the Cold War turned hot in 1962, the Library of Alexandria never burned, dinosaurs never went extinct, the Black Death never happened, World War II never started, humans colonized Mars in the 1980s, the internet was invented in the 19th century, the American Revolution failed, the Berlin Wall never fell, electricity discovered in ancient Greece, the printing press was never invented, the Mongol Empire conquered all of Europe, the Wright brothers never flew" />
       </Head>
       <body className="antialiased">
         <Main />
