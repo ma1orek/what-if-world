@@ -269,9 +269,9 @@ export default function Home(){
                 What if: ${currentPrompt.replace(/^What if\s*/i, '')}
               </h2>
               ${summary ? `<div style="color: #fff; font-size: 16px; margin-bottom: 24px; line-height: 1.8; padding: 20px; background: rgba(212, 170, 39, 0.1); border: 1px solid #d4aa27; border-radius: 8px;">
-                <strong style="color: #d4aa27;">Wstęp:</strong><br/>
+                <strong style="color: #d4aa27;">Intro:</strong><br/>
                 ${summary}
-              </div>` : '<div style="color: #ccc; font-size: 16px; margin-bottom: 24px; text-align: center;">Generowanie wstępu...</div>'}
+              </div>` : '<div style="color: #ccc; font-size: 16px; margin-bottom: 24px; text-align: center;">Generating intro...</div>'}
             </div>
           `;
         } else {
@@ -282,7 +282,7 @@ export default function Home(){
                 What if: ${currentPrompt.replace(/^What if\s*/i, '')}
               </h2>
               ${summary ? `<div style="color: #fff; font-size: 16px; margin-bottom: 24px; line-height: 1.8; padding: 20px; background: rgba(212, 170, 39, 0.1); border: 1px solid #d4aa27; border-radius: 8px;">
-                <strong style="color: #d4aa27;">Wstęp:</strong><br/>
+                <strong style="color: #d4aa27;">Intro:</strong><br/>
                 ${summary}
               </div>` : ''}
               ${events.length > 0 ? `<div style="color: #ccc; font-size: 14px; margin-bottom: 20px;">
@@ -313,8 +313,8 @@ export default function Home(){
 
   // Update Now Playing on active event change
   useEffect(() => {
-    // Czekaj aż summary i events są załadowane
-    if (!summary && events.length === 0) {
+    // Czekaj aż events są załadowane (summary może być undefined na początku)
+    if (events.length === 0) {
       // Jeszcze się generuje - nie pokazuj nic
       updateNowPlaying(undefined);
       return;
