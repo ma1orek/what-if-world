@@ -2,7 +2,7 @@
 
 > Rewrite pivotal moments in history and watch an alternate timeline unfold on an interactive world map — narrated by AI.
 
-![Whatify Demo Screenshot](./public/og/og-image.jpg)
+![Whatify World Screenshot](./public/ss.jpg)
 
 ## 🚀 Overview
 **Whatify** is an AI-powered platform that lets you explore alternate histories.  
