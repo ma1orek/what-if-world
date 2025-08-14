@@ -262,7 +262,7 @@ export default function Home(){
       
                                    // Show content based on what narrator is reading
         if (index === -1) {
-          // Narrator czyta wstęp - pokaż summary w żółtej ramce
+          // Narrator czyta wstęp - pokaż intro NAD listą lat (nie zamiast niej)
           content.innerHTML = `
             <div style="margin-bottom: 24px; text-align: center;">
               <h2 style="color: #fff; font-size: 20px; font-weight: 600; margin-bottom: 16px;">
@@ -272,10 +272,16 @@ export default function Home(){
                 <strong style="color: #d4aa27;">Intro:</strong><br/>
                 ${summary}
               </div>` : '<div style="color: #ccc; font-size: 16px; margin-bottom: 24px; text-align: center;">Generating intro...</div>'}
+              ${events.length > 0 ? `<div style="color: #ccc; font-size: 14px; margin-bottom: 20px;">
+                ${events.length} events
+              </div>
+              <div style="color: #ddd; line-height: 1.9; font-size: 16px;">
+                ${allEventsHTML}
+              </div>` : ''}
             </div>
           `;
         } else {
-          // Narrator czyta wydarzenie - pokaż summary + wydarzenia
+          // Narrator czyta wydarzenie - pokaż intro + wydarzenia (lista lat zawsze widoczna)
           content.innerHTML = `
             <div style="margin-bottom: 24px; text-align: center;">
               <h2 style="color: #fff; font-size: 20px; font-weight: 600; margin-bottom: 16px;">
