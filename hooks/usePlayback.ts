@@ -73,11 +73,11 @@ export default function usePlayback(mapApiRef: React.RefObject<any>, events: Eve
           console.log("ElevenLabs audio received, playing");
           const audio = new Audio(data.audioUrl);
           
-          // Timeout fallback dla auto-advance - krótszy timeout dla szybszej synchronizacji
+          // Timeout fallback dla auto-advance - dłuższy timeout dla lepszej synchronizacji
           const timeoutId = setTimeout(() => {
             console.log("ElevenLabs timeout fallback - continuing to next event");
             resolve();
-          }, 5000); // 5 sekund timeout dla szybszej synchronizacji
+          }, 15000); // 15 sekund timeout dla lepszej synchronizacji
           
           audio.onended = () => {
             console.log("ElevenLabs audio finished - onended");
@@ -94,15 +94,16 @@ export default function usePlayback(mapApiRef: React.RefObject<any>, events: Eve
             resolve();
           });
           
-                     // Sprawdź czy audio się skończyło co 50ms dla lepszej synchronizacji
+                     // Sprawdź czy audio się skończyło co 100ms dla lepszej synchronizacji
            const checkInterval = setInterval(() => {
-             if (audio.ended || (audio.duration > 0 && audio.currentTime >= audio.duration) || audio.paused) {
+             // Sprawdź czy audio ma duration i czy się skończyło
+             if (audio.ended || (audio.duration > 0 && audio.currentTime >= audio.duration - 0.1) || audio.paused) {
                console.log("ElevenLabs audio ended check - clearing interval");
                clearInterval(checkInterval);
                clearTimeout(timeoutId);
                resolve();
              }
-           }, 50);
+           }, 100);
           
 
                      audio.onerror = () => {
@@ -259,6 +260,9 @@ export default function usePlayback(mapApiRef: React.RefObject<any>, events: Eve
     console.log(`Waiting for event ${i} to finish speaking...`);
     await speakPromise;
     console.log(`Event ${i} finished speaking - audio completed`);
+    
+    // DODATKOWE SPRAWDZENIE - poczekaj chwilę żeby audio się na pewno skończyło
+    await new Promise(resolve => setTimeout(resolve, 200));
     
     // wyłącz mini-waveform po zakończeniu mowy
     if (mapApiRef.current && markerIdsRef.current[i]){
