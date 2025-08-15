@@ -46,10 +46,28 @@ class TTSSequencer {
       })
       .catch(error => {
         console.log("TTSSequencer failed, using Web Speech fallback:", error);
-        // Fallback na Web Speech API
+        // Fallback na Web Speech API - upewnij się że czeka na skończenie
         const u = new SpeechSynthesisUtterance(text);
         u.rate = 0.9; u.pitch = 1.0; u.lang = "en-US"; u.volume = 1.0;
-        u.onend = () => resolve();
+        
+        // Dodaj timeout dla Web Speech API
+        const webSpeechTimeout = setTimeout(() => {
+          console.log("Web Speech API timeout fallback");
+          resolve();
+        }, 8000);
+        
+        u.onend = () => {
+          console.log("Web Speech API finished");
+          clearTimeout(webSpeechTimeout);
+          resolve();
+        };
+        
+        u.onerror = () => {
+          console.log("Web Speech API error");
+          clearTimeout(webSpeechTimeout);
+          resolve();
+        };
+        
         window.speechSynthesis.cancel();
         window.speechSynthesis.speak(u);
       });
@@ -60,22 +78,30 @@ class TTSSequencer {
     const audio = new Audio(audioUrl);
     this.currentAudio = audio;
     
-    // Timeout fallback
+    // Timeout fallback - dłuższy żeby audio miało czas się skończyć
     const timeoutId = setTimeout(() => {
-      console.log("TTSSequencer timeout fallback");
+      console.log("TTSSequencer timeout fallback - audio took too long");
       resolve();
-    }, 5000);
+    }, 30000); // 30 sekund
 
-    // Sprawdź czy audio się skończyło co 50ms
+    // Sprawdź czy audio się skończyło co 100ms - częściej ale dokładniej
     const checkInterval = setInterval(() => {
-      if (audio.ended || (audio.duration > 0 && audio.currentTime >= audio.duration - 0.05) || audio.paused) {
-        console.log("TTSSequencer audio ended check");
+      // Sprawdź czy audio się skończyło - NIE sprawdzaj audio.paused bo to może być true zanim się skończy
+      if (audio.ended || (audio.duration > 0 && audio.currentTime >= audio.duration - 0.1)) {
+        console.log("TTSSequencer audio ended check - audio completed, duration:", audio.duration, "currentTime:", audio.currentTime);
         clearInterval(checkInterval);
         clearTimeout(timeoutId);
         this.currentAudio = null;
         resolve();
+      } else {
+        // Dodaj sprawdzenie czy audio.duration jest dostępne
+        if (audio.duration === 0 || isNaN(audio.duration)) {
+          console.log("TTSSequencer audio duration not ready yet - duration:", audio.duration, "currentTime:", audio.currentTime);
+        } else {
+          console.log("TTSSequencer audio still playing - duration:", audio.duration, "currentTime:", audio.currentTime);
+        }
       }
-    }, 50);
+    }, 100);
 
     audio.onended = () => {
       console.log("TTSSequencer audio onended");
@@ -94,8 +120,12 @@ class TTSSequencer {
     };
 
     // Start playback
-    audio.play().catch(() => {
-      console.log("TTSSequencer audio.play() failed");
+    console.log("TTSSequencer starting audio playback...");
+    
+    audio.play().then(() => {
+      console.log("TTSSequencer audio.play() started successfully");
+    }).catch((error) => {
+      console.log("TTSSequencer audio.play() failed:", error);
       clearInterval(checkInterval);
       clearTimeout(timeoutId);
       this.currentAudio = null;
@@ -215,6 +245,7 @@ export default function usePlayback(mapApiRef: React.RefObject<any>, events: Eve
       // Prefetch first event
       const firstEvent = events[0];
       if (firstEvent) {
+        // Użyj tej samej logiki co speakBlock - tytuł + opis jako jeden blok
         const firstEventText = `${firstEvent.year} — ${firstEvent.title}. ${firstEvent.description}`;
         prefetchAudio(firstEventText).catch(console.error);
       }
@@ -227,10 +258,21 @@ export default function usePlayback(mapApiRef: React.RefObject<any>, events: Eve
       return Promise.resolve();
     }
     
-    console.log("speak() proceeding - using TTSSequencer");
+    console.log("speak() proceeding - using TTSSequencer for:", text.substring(0, 50) + "...");
     
     // Użyj TTSSequencer który kontroluje kolejność
-    return ttsSequencerRef.current.speak(text);
+    const speakPromise = ttsSequencerRef.current.speak(text);
+    
+    // Dodatkowe zabezpieczenie - upewnij się że Promise się nie rozwiązuje za wcześnie
+    return new Promise<void>((resolve, reject) => {
+      speakPromise.then(() => {
+        console.log("TTSSequencer.speak() resolved - audio completed");
+        resolve();
+      }).catch((error) => {
+        console.error("TTSSequencer.speak() failed:", error);
+        reject(error);
+      });
+    });
   }
 
   // PREFETCH NASTĘPNEGO EVENTU - uruchom w tle podczas odtwarzania aktualnego
@@ -245,6 +287,20 @@ export default function usePlayback(mapApiRef: React.RefObject<any>, events: Eve
         console.log(`Prefetching next event ${nextIndex} in background...`);
         prefetchAudio(nextEventText).catch(console.error);
       }
+    }
+  }
+
+  // NOWA FUNKCJA: speakBlock - czyta tytuł + opis jako jeden blok i czeka na zakończenie
+  async function speakBlock(title: string, body: string): Promise<void> {
+    const fullText = `${title}. ${body}`;
+    console.log(`speakBlock: reading full block - "${title.substring(0, 30)}..." + "${body.substring(0, 30)}..."`);
+    
+    try {
+      await speak(fullText); // CZEKAJ NA SKOŃCZENIE CAŁEGO BLOKU
+      console.log(`speakBlock: completed reading full block`);
+    } catch (error) {
+      console.error(`speakBlock: failed reading full block:`, error);
+      throw error;
     }
   }
 
@@ -283,21 +339,29 @@ export default function usePlayback(mapApiRef: React.RefObject<any>, events: Eve
     // Ustaw index na -1 gdy narrator czyta intro
     setIndex(-1);
     
-    // Odtwórz intro summary jeśli istnieje
+    // Odtwórz intro summary jeśli istnieje - CZEKAJ NA PEŁNE ZAKOŃCZENIE
     if (summary && summary.trim()) {
-      console.log("Reading intro...");
-      await speak(summary); // CZEKAJ NA SKOŃCZENIE INTRO
-      console.log("Intro finished, waiting 0.05 seconds before first event...");
+      console.log("=== INTRO START === Reading intro...");
+      const introStartTime = Date.now();
       
-      // Czekaj tylko 0.05 sekundy przed pierwszym eventem - BARDZO SZYBKO
-      await new Promise(resolve => setTimeout(resolve, 50));
+      try {
+        await speak(summary); // CZEKAJ NA SKOŃCZENIE INTRO PRZED PRZEJŚCIEM DALEJ
+        const introDuration = Date.now() - introStartTime;
+        console.log(`=== INTRO COMPLETED === Finished after ${introDuration}ms`);
+        console.log("Intro finished, waiting 0.5 seconds before first event...");
+        
+        // Czekaj 0.5 sekundy przed pierwszym eventem
+        await new Promise(resolve => setTimeout(resolve, 500));
+      } catch (error) {
+        console.error("=== INTRO ERROR === Failed:", error);
+      }
     }
     
     phaseRef.current = "events";
     
     console.log("playIntroThenEvents - events length:", eventsRef.current.length, "firstEventStarted:", firstEventStartedRef.current);
     
-    // Automatycznie przejdź do pierwszego eventu po intro
+    // Automatycznie przejdź do pierwszego eventu po intro - CZEKAJ NA PEŁNE ZAKOŃCZENIE
     if (eventsRef.current.length > 0 && !firstEventStartedRef.current) {
       firstEventStartedRef.current = true;
       console.log("Auto-advancing to first event after intro");
@@ -316,8 +380,7 @@ export default function usePlayback(mapApiRef: React.RefObject<any>, events: Eve
     const pt = ev.geoPoints?.[0];
 
     // NARRATOR ZACZYNA MÓWIĆ OD RAZU - bez czekania na cokolwiek
-    const line = `${ev.year} — ${ev.title}. ${ev.description}`;
-    console.log(`Reading event ${i}: ${line}`);
+    console.log(`Reading event ${i}: ${ev.year} — ${ev.title}. ${ev.description}`);
     console.log(`Starting to speak event ${i} - IMMEDIATELY, no delays`);
     
     // PREFETCH NASTĘPNEGO EVENTU W TLE - nie blokuje narratora
@@ -353,10 +416,19 @@ export default function usePlayback(mapApiRef: React.RefObject<any>, events: Eve
       }
     }
     
-    // CZEKAJ NA SKOŃCZENIE MÓWIENIA - TO JEST KLUCZOWE!
-    console.log(`Waiting for event ${i} to finish speaking...`);
-    await speak(line); // CZEKAJ NA SKOŃCZENIE AUDIO PRZED PRZEJŚCIEM DALEJ
-    console.log(`Event ${i} finished speaking - audio completed`);
+    // CZEKAJ NA SKOŃCZENIE MÓWIENIA CAŁEGO BLOKU - TO JEST KLUCZOWE!
+    console.log(`=== EVENT ${i} START === Waiting for full block audio to complete...`);
+    const startTime = Date.now();
+    
+    try {
+      // Użyj speakBlock zamiast speak - czyta tytuł + opis jako jeden blok
+      const eventTitle = `${ev.year} — ${ev.title}`;
+      await speakBlock(eventTitle, ev.description); // CZEKAJ NA SKOŃCZENIE AUDIO PRZED PRZEJŚCIEM DALEJ
+      const duration = Date.now() - startTime;
+      console.log(`=== EVENT ${i} COMPLETED === Full block audio finished after ${duration}ms`);
+    } catch (error) {
+      console.error(`=== EVENT ${i} ERROR === Full block audio failed:`, error);
+    }
     
     // wyłącz mini-waveform po zakończeniu mowy
     if (mapApiRef.current && markerIdsRef.current[i]){
