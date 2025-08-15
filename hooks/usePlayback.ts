@@ -49,6 +49,16 @@ export default function usePlayback(mapApiRef: React.RefObject<any>, events: Eve
       }
       console.log("speak() proceeding - localMuted is false");
       
+      // ZATRZYMAJ WSZYSTKIE POPRZEDNIE AUDIO PRZED ROZPOCZĘCIEM NOWEGO
+      window.speechSynthesis.cancel();
+      const audioElements = document.querySelectorAll('audio');
+      audioElements.forEach(audio => {
+        if (!audio.paused) {
+          audio.pause();
+          audio.currentTime = 0;
+        }
+      });
+      
       // Używaj ElevenLabs na obu platformach dla spójności głosu
       console.log("Using ElevenLabs API for consistent voice across platforms");
       
@@ -67,10 +77,10 @@ export default function usePlayback(mapApiRef: React.RefObject<any>, events: Eve
           const timeoutId = setTimeout(() => {
             console.log("ElevenLabs timeout fallback - continuing to next event");
             resolve();
-          }, 10000); // 10 sekund timeout dla lepszej synchronizacji
+          }, 15000); // 15 sekund timeout dla lepszej synchronizacji
           
           audio.onended = () => {
-            console.log("ElevenLabs audio finished");
+            console.log("ElevenLabs audio finished - onended");
             clearTimeout(timeoutId);
             clearInterval(checkInterval);
             resolve(); // To pozwoli na auto-advance
@@ -84,15 +94,15 @@ export default function usePlayback(mapApiRef: React.RefObject<any>, events: Eve
             resolve();
           });
           
-          // Sprawdź czy audio się skończyło co 50ms dla lepszej synchronizacji
+          // Sprawdź czy audio się skończyło co 100ms dla lepszej synchronizacji
           const checkInterval = setInterval(() => {
-            if (audio.ended || audio.currentTime >= audio.duration || audio.paused) {
+            if (audio.ended || (audio.duration > 0 && audio.currentTime >= audio.duration) || audio.paused) {
               console.log("ElevenLabs audio ended check - clearing interval");
               clearInterval(checkInterval);
               clearTimeout(timeoutId);
               resolve();
             }
-          }, 50);
+          }, 100);
           
 
           audio.onerror = () => {
@@ -108,19 +118,20 @@ export default function usePlayback(mapApiRef: React.RefObject<any>, events: Eve
             window.speechSynthesis.cancel();
             setTimeout(() => window.speechSynthesis.speak(u), 100);
           };
-                      audio.play().catch(() => {
-              console.log("Audio.play() failed, using Web Speech fallback");
-              clearTimeout(timeoutId);
-              clearInterval(checkInterval);
-              // Fallback na Web Speech API
-              const u = new SpeechSynthesisUtterance(text);
-              u.rate = 0.9; u.pitch = 1.0; u.lang = "en-US"; u.volume = 1.0;
-              const v = pickMale(); if (v) u.voice = v;
-              u.onend = () => resolve();
-              utterRef.current = u;
-              window.speechSynthesis.cancel();
-              setTimeout(() => window.speechSynthesis.speak(u), 100);
-            });
+          
+          audio.play().catch(() => {
+            console.log("Audio.play() failed, using Web Speech fallback");
+            clearTimeout(timeoutId);
+            clearInterval(checkInterval);
+            // Fallback na Web Speech API
+            const u = new SpeechSynthesisUtterance(text);
+            u.rate = 0.9; u.pitch = 1.0; u.lang = "en-US"; u.volume = 1.0;
+            const v = pickMale(); if (v) u.voice = v;
+            u.onend = () => resolve();
+            utterRef.current = u;
+            window.speechSynthesis.cancel();
+            setTimeout(() => window.speechSynthesis.speak(u), 100);
+          });
         } else {
           throw new Error("No audio URL received");
         }
@@ -227,7 +238,7 @@ export default function usePlayback(mapApiRef: React.RefObject<any>, events: Eve
     console.log(`Reading event ${i}: ${line}`);
     console.log(`Starting to speak event ${i} - IMMEDIATELY after activation`);
     
-    // Rozpocznij mówienie OD RAZU
+    // Rozpocznij mówienie OD RAZU - bez czekania na animacje
     const speakPromise = speak(line);
     
     // ANIMACJE MAPY RÓWNOLEGLE - nie blokują narratora
@@ -247,8 +258,13 @@ export default function usePlayback(mapApiRef: React.RefObject<any>, events: Eve
       }
     }
     
-    // CZEKAJ NA SKOŃCZENIE MÓWIENIA
+    // CZEKAJ NA SKOŃCZENIE MÓWIENIA - TO JEST KLUCZOWE
+    console.log(`Waiting for event ${i} to finish speaking...`);
     await speakPromise;
+    console.log(`Event ${i} finished speaking - audio completed`);
+    
+    // DODATKOWE SPRAWDZENIE - poczekaj chwilę żeby audio się na pewno skończyło
+    await new Promise(resolve => setTimeout(resolve, 100));
     console.log(`Event ${i} finished speaking - audio completed`);
     
     // wyłącz mini-waveform po zakończeniu mowy
