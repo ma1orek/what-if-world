@@ -578,12 +578,18 @@ export default function Home(){
             </button>
                          <button className="btn btn--accent" onClick={playing ? pause : play} title={playing ? 'Pause' : 'Play'} style={{
                padding: isMobile ? '8px 8px 8px 8px' : '10px 16px',
-               minWidth: isMobile ? '40px' : 'auto',
+               minWidth: isMobile ? '80px' : 'auto',
                height: isMobile ? '40px' : 'auto',
                display: 'flex',
                alignItems: 'center',
                justifyContent: 'center',
-               gap: isMobile ? '0' : '8px'
+               gap: isMobile ? '4px' : '8px',
+               // Mobile: jaśniejszy kolor dla lepszej widoczności
+               background: isMobile ? '#f5c84a' : undefined,
+               color: isMobile ? '#000' : undefined,
+               borderColor: isMobile ? '#f5c84a' : undefined,
+               fontWeight: isMobile ? '800' : undefined,
+               boxShadow: isMobile ? '0 0 10px rgba(245, 200, 74, 0.5)' : undefined
              }}>
               {playing ? (
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
