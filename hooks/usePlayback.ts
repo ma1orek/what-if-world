@@ -63,11 +63,11 @@ export default function usePlayback(mapApiRef: React.RefObject<any>, events: Eve
           console.log("ElevenLabs audio received, playing");
           const audio = new Audio(data.audioUrl);
           
-          // Timeout fallback dla auto-advance
+          // Timeout fallback dla auto-advance - dłuższy timeout dla lepszej synchronizacji
           const timeoutId = setTimeout(() => {
             console.log("ElevenLabs timeout fallback - continuing to next event");
             resolve();
-          }, 5000); // 5 sekund timeout
+          }, 10000); // 10 sekund timeout dla lepszej synchronizacji
           
           audio.onended = () => {
             console.log("ElevenLabs audio finished");
@@ -75,10 +75,28 @@ export default function usePlayback(mapApiRef: React.RefObject<any>, events: Eve
             resolve(); // To pozwoli na auto-advance
           };
           
+          // Dodatkowe sprawdzenie czy audio się skończyło
+          audio.addEventListener('ended', () => {
+            console.log("ElevenLabs audio ended event listener");
+            clearTimeout(timeoutId);
+            resolve();
+          });
+          
+          // Sprawdź czy audio się skończyło co 100ms
+          const checkInterval = setInterval(() => {
+            if (audio.ended || audio.currentTime >= audio.duration) {
+              console.log("ElevenLabs audio ended check - clearing interval");
+              clearInterval(checkInterval);
+              clearTimeout(timeoutId);
+              resolve();
+            }
+          }, 100);
+          
 
           audio.onerror = () => {
             console.log("ElevenLabs failed, using Web Speech fallback");
             clearTimeout(timeoutId);
+            clearInterval(checkInterval);
             // Fallback na Web Speech API
             const u = new SpeechSynthesisUtterance(text);
             u.rate = 0.9; u.pitch = 1.0; u.lang = "en-US"; u.volume = 1.0;
@@ -88,18 +106,19 @@ export default function usePlayback(mapApiRef: React.RefObject<any>, events: Eve
             window.speechSynthesis.cancel();
             setTimeout(() => window.speechSynthesis.speak(u), 100);
           };
-          audio.play().catch(() => {
-            console.log("Audio.play() failed, using Web Speech fallback");
-            clearTimeout(timeoutId);
-            // Fallback na Web Speech API
-            const u = new SpeechSynthesisUtterance(text);
-            u.rate = 0.9; u.pitch = 1.0; u.lang = "en-US"; u.volume = 1.0;
-            const v = pickMale(); if (v) u.voice = v;
-            u.onend = () => resolve();
-            utterRef.current = u;
-            window.speechSynthesis.cancel();
-            setTimeout(() => window.speechSynthesis.speak(u), 100);
-          });
+                      audio.play().catch(() => {
+              console.log("Audio.play() failed, using Web Speech fallback");
+              clearTimeout(timeoutId);
+              clearInterval(checkInterval);
+              // Fallback na Web Speech API
+              const u = new SpeechSynthesisUtterance(text);
+              u.rate = 0.9; u.pitch = 1.0; u.lang = "en-US"; u.volume = 1.0;
+              const v = pickMale(); if (v) u.voice = v;
+              u.onend = () => resolve();
+              utterRef.current = u;
+              window.speechSynthesis.cancel();
+              setTimeout(() => window.speechSynthesis.speak(u), 100);
+            });
         } else {
           throw new Error("No audio URL received");
         }

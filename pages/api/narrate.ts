@@ -14,7 +14,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // ElevenLabs API configuration - dodaj debugowanie
     const ELEVENLABS_API_KEY = process.env.ELEVENLABS_API_KEY;
-    const VOICE_ID = process.env.ELEVENLABS_VOICE_ID || '21m00Tcm4TlvDq8ikWAM';
+    const VOICE_ID = process.env.ELEVENLABS_VOICE_ID || 'Mu5jxyqZOLIGltFpfalg';
     
     console.log('=== ELEVENLABS DEBUG ===');
     console.log('ELEVENLABS_API_KEY exists:', !!ELEVENLABS_API_KEY);
