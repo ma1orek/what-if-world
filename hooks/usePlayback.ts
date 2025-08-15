@@ -189,10 +189,10 @@ export default function usePlayback(mapApiRef: React.RefObject<any>, events: Eve
     if (summary && summary.trim()) {
       console.log("Reading intro...");
       await speak(summary);
-      console.log("Intro finished, waiting 2 seconds before first event...");
+      console.log("Intro finished, waiting 0.5 seconds before first event...");
       
-      // Czekaj 2 sekundy przed pierwszym eventem
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Czekaj tylko 0.5 sekundy przed pierwszym eventem - SZYBKO
+      await new Promise(resolve => setTimeout(resolve, 500));
     }
     
     phaseRef.current = "events";
@@ -273,7 +273,7 @@ export default function usePlayback(mapApiRef: React.RefObject<any>, events: Eve
     }
 
     // Krótka pauza między eventami - narrator zaczyna od razu po aktywacji
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise(resolve => setTimeout(resolve, 200));
 
     // auto-advance, ale tylko jeśli playing jest true i kolejny istnieje:
     if (eventsRef.current[i+1] && playingRef.current) {
@@ -383,7 +383,7 @@ export default function usePlayback(mapApiRef: React.RefObject<any>, events: Eve
       setTimeout(() => {
         console.log("Calling playIntroThenEvents after timeout");
         playIntroThenEvents();
-      }, 1000);
+      }, 500);
     }
   }, [summary, events]);
 
