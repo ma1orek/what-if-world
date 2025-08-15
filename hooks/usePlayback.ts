@@ -14,33 +14,21 @@ export default function usePlayback(mapApiRef: React.RefObject<any>, events: Eve
     // Sprawdź czy to urządzenie mobilne
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     
-    if (isMobile) {
-      // Na telefonie preferuj głosy systemowe
-      const mobilePrefs = [
-        /en-US/i,
-        /en-GB/i, 
-        /English/i,
-        /Samantha/i,  // iOS
-        /Google UK English/i,
-        /Microsoft.*/i
-      ];
-      
-      for (const re of mobilePrefs) {
-        const v = voices.find(v => re.test(v.name + v.voiceURI));
-        if (v) {
-          console.log("Mobile voice selected:", v.name);
-          return v;
-        }
-      }
-    } else {
-      // Na desktopie preferuj męskie głosy
-      const desktopPrefs = [/Male/i, /Google UK English Male/i, /Microsoft.*(Guy|Ryan|Brandon)/i, /en-US/i];
-      for (const re of desktopPrefs) {
-        const v = voices.find(v => re.test(v.name + v.voiceURI));
-        if (v) {
-          console.log("Desktop voice selected:", v.name);
-          return v;
-        }
+    // Na obu platformach preferuj męskie głosy dla spójności
+    const malePrefs = [
+      /Male/i, 
+      /Google UK English Male/i, 
+      /Microsoft.*(Guy|Ryan|Brandon)/i,
+      /en-US/i,
+      /en-GB/i,
+      /English/i
+    ];
+    
+    for (const re of malePrefs) {
+      const v = voices.find(v => re.test(v.name + v.voiceURI));
+      if (v) {
+        console.log("Male voice selected:", v.name);
+        return v;
       }
     }
     
@@ -154,7 +142,11 @@ export default function usePlayback(mapApiRef: React.RefObject<any>, events: Eve
   }, [muted]);
 
   async function playIntroThenEvents() {
-    if (startedRef.current && playingRef.current) return;
+    console.log("playIntroThenEvents called - startedRef:", startedRef.current, "playingRef:", playingRef.current);
+    if (startedRef.current && playingRef.current) {
+      console.log("playIntroThenEvents - already started and playing, returning");
+      return;
+    }
     startedRef.current = true;
     
     // Ustaw playing na true żeby narrator działał
@@ -177,11 +169,15 @@ export default function usePlayback(mapApiRef: React.RefObject<any>, events: Eve
     
     phaseRef.current = "events";
     
+    console.log("playIntroThenEvents - events length:", eventsRef.current.length, "firstEventStarted:", firstEventStartedRef.current);
+    
     // Automatycznie przejdź do pierwszego eventu po intro
     if (eventsRef.current.length > 0 && !firstEventStartedRef.current) {
       firstEventStartedRef.current = true;
       console.log("Auto-advancing to first event after intro");
       await playEvent(0);
+    } else {
+      console.log("playIntroThenEvents - no events or first event already started");
     }
   }
 
@@ -375,11 +371,21 @@ export default function usePlayback(mapApiRef: React.RefObject<any>, events: Eve
     pause, 
     next(){pause(); if(eventsRef.current[index+1]) playEvent(index+1); else if(eventsRef.current[0]) playEvent(0);}, 
     prev(){pause(); if(index > 0) playEvent(index-1);}, 
-    restart(){pause(); startNewScenario(); setTimeout(() => {
-      startedRef.current = false;
-      firstEventStartedRef.current = false;
-      playIntroThenEvents();
-    }, 500);}, 
+    restart(){
+      console.log("Restart called - pausing current playback");
+      pause(); 
+      console.log("Restart - calling startNewScenario");
+      startNewScenario(); 
+      console.log("Restart - setting timeout to restart playback");
+      setTimeout(() => {
+        console.log("Restart timeout - setting startedRef to true");
+        startedRef.current = true;
+        firstEventStartedRef.current = false;
+        console.log("Restart - events available:", events.length, "eventsRef.current length:", eventsRef.current.length);
+        console.log("Restart - calling playIntroThenEvents");
+        playIntroThenEvents();
+      }, 500);
+    }, 
     stopAll, 
     startNewScenario,
     setIndex,
