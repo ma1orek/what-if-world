@@ -577,8 +577,8 @@ export default function Home(){
               {!isMobile && 'Prev'}
             </button>
                          <button className="btn btn--accent" onClick={playing ? pause : play} title={playing ? 'Pause' : 'Play'} style={{
-               padding: isMobile ? '8px 8px 8px 8px' : '10px 16px',
-               minWidth: isMobile ? '80px' : 'auto',
+               padding: isMobile ? '6px 6px 6px 6px' : '10px 16px',
+               minWidth: isMobile ? '60px' : 'auto',
                height: isMobile ? '40px' : 'auto',
                display: 'flex',
                alignItems: 'center',

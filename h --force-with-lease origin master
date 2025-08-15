@@ -1,0 +1,5 @@
+[33m279a524[m[33m ([m[1;36mHEAD -> [m[1;32mmaster[m[33m)[m Fix audio synchronization - restore proper waiting for narrator completion
+[33mf00e09c[m[33m ([m[1;31morigin/master[m[33m)[m Fix mobile PLAY button - increase width to 80px, better spacing for PLAY text
+[33m1280e59[m Ultra-fast audio - remove all delays, 5s timeout, 50ms interval, immediate Web Speech
+[33m45f32c9[m Ultra-fast timing - narrator starts in 0.1s max, add PLAY text on mobile
+[33m6d400cd[m Speed up timing - narrator starts in 0.5s max from activation, faster transitions
