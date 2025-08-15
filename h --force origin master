@@ -1,0 +1,5 @@
+[33m0babdaa[m[33m ([m[1;36mHEAD -> [m[1;32mmaster[m[33m, [m[1;31morigin/master[m[33m)[m Fix narration sequence: add speakBlock function and ensure proper audio synchronization
+[33m9f5cc94[m Implement TTSSequencer for controlled audio playback - ensures events play one after another without overlapping, waiting for each audio to complete before moving to next event
+[33ma469cc8[m Fix audio synchronization - add checkInterval to prefetched audio to ensure narrator waits for completion before next event
+[33m0603e25[m Implement audio prefetching system and fix mobile button margin - eliminates 3-second delay by prefetching audio in background, instant playback from cache, and proper mobile button spacing
+[33m21d0eb9[m Fix mobile PLAY button width - reduce from 80px to 60px and padding from 8px to 6px to prevent overflow

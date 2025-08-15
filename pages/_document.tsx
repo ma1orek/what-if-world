@@ -51,6 +51,19 @@ export default function Document() {
         
         {/* SEO Keywords - Example "What if?" tags */}
         <meta name="keywords" content="alternate history, AI history generator, what if scenarios, historical simulations, the Roman Empire never fell, Napoleon won at Waterloo, the Cold War turned hot in 1962, the Library of Alexandria never burned, dinosaurs never went extinct, the Black Death never happened, World War II never started, humans colonized Mars in the 1980s, the internet was invented in the 19th century, the American Revolution failed, the Berlin Wall never fell, electricity discovered in ancient Greece, the printing press was never invented, the Mongol Empire conquered all of Europe, the Wright brothers never flew" />
+        
+        {/* Google Analytics */}
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-RC9MPVY2MP"></script>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', 'G-RC9MPVY2MP');
+            `,
+          }}
+        />
       </Head>
       <body className="antialiased">
         <Main />
