@@ -5,7 +5,7 @@ export default function Document() {
     <Html lang="en">
       <Head>
         {/* Critical SEO Meta Tags */}
-        <title>Whatify — AI-Powered Alternate History Timeline Generator</title>
+        <title>Whatify World - AI-narrated alternate history, generated in real time and brought to life on an interactive, living world map.</title>
         <meta name="description" content="Rewrite pivotal moments in history and watch an alternate timeline unfold on an interactive world map — narrated by AI." />
         <link rel="canonical" href="https://www.whatify.world/" />
         
@@ -36,7 +36,7 @@ export default function Document() {
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://www.whatify.world/" />
         <meta property="og:site_name" content="Whatify" />
-        <meta property="og:title" content="Whatify — AI-Powered Alternate History Timeline Generator" />
+        <meta property="og:title" content="Whatify World - AI-narrated alternate history, generated in real time and brought to life on an interactive, living world map." />
         <meta property="og:description" content="Explore alternate histories with AI: change key events and see the ripple effects on an interactive, narrated world map." />
         <meta property="og:image" content="https://www.whatify.world/og/og-image.jpg" />
         <meta property="og:image:width" content="1200" />
@@ -45,7 +45,7 @@ export default function Document() {
         
         {/* Twitter Card Meta Tags */}
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="Whatify — AI-Powered Alternate History Timeline Generator" />
+        <meta name="twitter:title" content="Whatify World - AI-narrated alternate history, generated in real time and brought to life on an interactive, living world map." />
         <meta name="twitter:description" content="Rewrite history and visualize alternate timelines on an interactive, narrated world map." />
         <meta name="twitter:image" content="https://www.whatify.world/og/og-image.jpg" />
         
