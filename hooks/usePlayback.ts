@@ -131,15 +131,27 @@ export default function usePlayback(mapApiRef: React.RefObject<any>, events: Eve
           resolve();
         }, 1000); // 1 sekunda bo audio jest już w cache
         
+        // Dodatkowe sprawdzenie czy audio się skończyło co 50ms dla lepszej synchronizacji
+        const checkInterval = setInterval(() => {
+          if (audio.ended || (audio.duration > 0 && audio.currentTime >= audio.duration - 0.05) || audio.paused) {
+            console.log("Prefetched audio ended check - clearing interval");
+            clearInterval(checkInterval);
+            clearTimeout(timeoutId);
+            resolve();
+          }
+        }, 50);
+        
         audio.onended = () => {
           console.log("Prefetched audio finished - onended");
           clearTimeout(timeoutId);
+          clearInterval(checkInterval);
           resolve();
         };
         
         audio.onerror = () => {
           console.log("Prefetched audio failed, falling back to TTS");
           clearTimeout(timeoutId);
+          clearInterval(checkInterval);
           // Fallback na Web Speech API
           const u = new SpeechSynthesisUtterance(text);
           u.rate = 0.9; u.pitch = 1.0; u.lang = "en-US"; u.volume = 1.0;
@@ -154,6 +166,7 @@ export default function usePlayback(mapApiRef: React.RefObject<any>, events: Eve
         audio.play().catch(() => {
           console.log("Prefetched audio.play() failed, using Web Speech fallback");
           clearTimeout(timeoutId);
+          clearInterval(checkInterval);
           const u = new SpeechSynthesisUtterance(text);
           u.rate = 0.9; u.pitch = 1.0; u.lang = "en-US"; u.volume = 1.0;
           const v = pickMale(); if (v) u.voice = v;
