@@ -206,16 +206,36 @@ export default function usePlayback(mapApiRef: React.RefObject<any>, events: Eve
     setPlaying(true);
     const pt = ev.geoPoints?.[0];
 
+    // AKTYWUJ PUNKT OD RAZU - bez czekania na animacje
     if (pt && mapApiRef.current){
       // utwórz marker jeśli nie istnieje (nieaktywny)
       if (!markerIdsRef.current[i]){
         const id = mapApiRef.current.marker(pt[0], pt[1], ev.title, false);
         markerIdsRef.current[i] = id;
       }
-      // fokus
+      
+      // aktywuj marker bieżący i wycisz resztę (szare 20%) - OD RAZU
+      mapApiRef.current.setActiveMarker(markerIdsRef.current[i]);
+      
+      // włącz mini-waveform na czas mówienia - OD RAZU
+      mapApiRef.current.showWaveform(markerIdsRef.current[i], true);
+      lastActiveIdRef.current = markerIdsRef.current[i];
+    }
+
+    // NARRATOR ZACZYNA MÓWIĆ OD RAZU po aktywacji punktu
+    const line = `${ev.year} — ${ev.title}. ${ev.description}`;
+    console.log(`Reading event ${i}: ${line}`);
+    console.log(`Starting to speak event ${i} - IMMEDIATELY after activation`);
+    
+    // Rozpocznij mówienie OD RAZU
+    const speakPromise = speak(line);
+    
+    // ANIMACJE MAPY RÓWNOLEGLE - nie blokują narratora
+    if (pt && mapApiRef.current){
+      // fokus - równolegle z mówieniem
       mapApiRef.current.focus(pt[0], pt[1], 2.2);
 
-      // link: poprzedni -> bieżący
+      // link: poprzedni -> bieżący - równolegle z mówieniem
       const curId = markerIdsRef.current[i];
       if (lastActiveIdRef.current && lastActiveIdRef.current !== curId){
         mapApiRef.current.link(lastActiveIdRef.current, curId, { 
@@ -225,25 +245,11 @@ export default function usePlayback(mapApiRef: React.RefObject<any>, events: Eve
           duration: 2000 
         });
       }
-
-      // aktywuj marker bieżący i wycisz resztę (szare 20%)
-      mapApiRef.current.setActiveMarker(markerIdsRef.current[i]);
-
-      // włącz mini-waveform na czas mówienia
-      mapApiRef.current.showWaveform(markerIdsRef.current[i], true);
-      lastActiveIdRef.current = markerIdsRef.current[i];
     }
-
-    const line = `${ev.year} — ${ev.title}. ${ev.description}`;
-    console.log(`Reading event ${i}: ${line}`);
     
-    // Speak and wait for completion
-    console.log(`Starting to speak event ${i}`);
-    await speak(line);
+    // CZEKAJ NA SKOŃCZENIE MÓWIENIA
+    await speakPromise;
     console.log(`Event ${i} finished speaking - audio completed`);
-    
-    // Dodatkowe sprawdzenie - poczekaj chwilę żeby audio się na pewno skończyło
-    await new Promise(resolve => setTimeout(resolve, 200));
     
     // wyłącz mini-waveform po zakończeniu mowy
     if (mapApiRef.current && markerIdsRef.current[i]){
@@ -257,8 +263,8 @@ export default function usePlayback(mapApiRef: React.RefObject<any>, events: Eve
       return;
     }
 
-    // Krótka pauza między eventami dla lepszego flow
-    await new Promise(resolve => setTimeout(resolve, 500));
+    // Krótka pauza między eventami - narrator zaczyna od razu po aktywacji
+    await new Promise(resolve => setTimeout(resolve, 200));
 
     // auto-advance, ale tylko jeśli playing jest true i kolejny istnieje:
     if (eventsRef.current[i+1] && playingRef.current) {
