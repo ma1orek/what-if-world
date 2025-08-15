@@ -4,7 +4,7 @@ const fetch = require("node-fetch");
 async function tts(text) {
   const key = process.env.ELEVENLABS_API_KEY;
   if (!key) return null;
-  const voice = process.env.ELEVENLABS_VOICE_ID || "21m00Tcm4TlvDq8ikWAM";
+  const voice = process.env.ELEVENLABS_VOICE_ID || "JBFqnCBsd6RMkjVDRZzb";
   const url = `https://api.elevenlabs.io/v1/text-to-speech/${voice}?optimize_streaming_latency=0&output_format=mp3_44100_128`;
   const r = await fetch(url, {
     method: "POST",

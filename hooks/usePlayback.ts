@@ -72,6 +72,7 @@ export default function usePlayback(mapApiRef: React.RefObject<any>, events: Eve
           audio.onended = () => {
             console.log("ElevenLabs audio finished");
             clearTimeout(timeoutId);
+            clearInterval(checkInterval);
             resolve(); // To pozwoli na auto-advance
           };
           
@@ -79,18 +80,19 @@ export default function usePlayback(mapApiRef: React.RefObject<any>, events: Eve
           audio.addEventListener('ended', () => {
             console.log("ElevenLabs audio ended event listener");
             clearTimeout(timeoutId);
+            clearInterval(checkInterval);
             resolve();
           });
           
-          // Sprawdź czy audio się skończyło co 100ms
+          // Sprawdź czy audio się skończyło co 50ms dla lepszej synchronizacji
           const checkInterval = setInterval(() => {
-            if (audio.ended || audio.currentTime >= audio.duration) {
+            if (audio.ended || audio.currentTime >= audio.duration || audio.paused) {
               console.log("ElevenLabs audio ended check - clearing interval");
               clearInterval(checkInterval);
               clearTimeout(timeoutId);
               resolve();
             }
-          }, 100);
+          }, 50);
           
 
           audio.onerror = () => {
@@ -236,8 +238,12 @@ export default function usePlayback(mapApiRef: React.RefObject<any>, events: Eve
     console.log(`Reading event ${i}: ${line}`);
     
     // Speak and wait for completion
+    console.log(`Starting to speak event ${i}`);
     await speak(line);
-    console.log(`Event ${i} finished speaking`);
+    console.log(`Event ${i} finished speaking - audio completed`);
+    
+    // Dodatkowe sprawdzenie - poczekaj chwilę żeby audio się na pewno skończyło
+    await new Promise(resolve => setTimeout(resolve, 200));
     
     // wyłącz mini-waveform po zakończeniu mowy
     if (mapApiRef.current && markerIdsRef.current[i]){
@@ -251,8 +257,8 @@ export default function usePlayback(mapApiRef: React.RefObject<any>, events: Eve
       return;
     }
 
-    // Czekaj 1 sekundę przed następnym eventem
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    // Krótka pauza między eventami dla lepszego flow
+    await new Promise(resolve => setTimeout(resolve, 500));
 
     // auto-advance, ale tylko jeśli playing jest true i kolejny istnieje:
     if (eventsRef.current[i+1] && playingRef.current) {

@@ -11,7 +11,7 @@ class ElevenLabsService {
     
     this.apiKey = process.env.ELEVENLABS_API_KEY;
     this.baseUrl = 'https://api.elevenlabs.io/v1';
-    this.voiceId = process.env.ELEVENLABS_VOICE_ID || '21m00Tcm4TlvDq8ikWAM'; // Default narrator voice
+    this.voiceId = process.env.ELEVENLABS_VOICE_ID || 'JBFqnCBsd6RMkjVDRZzb'; // Default narrator voice
     this.maxRetries = 3;
     this.retryDelay = 1000;
     
