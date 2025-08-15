@@ -75,11 +75,7 @@ export default function usePlayback(mapApiRef: React.RefObject<any>, events: Eve
             resolve(); // To pozwoli na auto-advance
           };
           
-          audio.onpause = () => {
-            console.log("ElevenLabs audio paused");
-            clearTimeout(timeoutId);
-            resolve(); // Resolve when audio is paused
-          };
+
           audio.onerror = () => {
             console.log("ElevenLabs failed, using Web Speech fallback");
             clearTimeout(timeoutId);
@@ -236,8 +232,8 @@ export default function usePlayback(mapApiRef: React.RefObject<any>, events: Eve
       return;
     }
 
-    // Krótka pauza między eventami dla lepszego flow
-    await new Promise(resolve => setTimeout(resolve, 500));
+    // Czekaj 1 sekundę przed następnym eventem
+    await new Promise(resolve => setTimeout(resolve, 1000));
 
     // auto-advance, ale tylko jeśli playing jest true i kolejny istnieje:
     if (eventsRef.current[i+1] && playingRef.current) {
