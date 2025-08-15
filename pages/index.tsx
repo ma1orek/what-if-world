@@ -578,8 +578,9 @@ export default function Home(){
             </button>
                          <button className="btn btn--accent" onClick={playing ? pause : play} title={playing ? 'Pause' : 'Play'} style={{
                padding: isMobile ? '6px 6px 6px 6px' : '10px 16px',
-               minWidth: isMobile ? '60px' : 'auto',
+               minWidth: isMobile ? '80px' : 'auto',
                height: isMobile ? '40px' : 'auto',
+               marginRight: isMobile ? '14px' : 'auto',
                display: 'flex',
                alignItems: 'center',
                justifyContent: 'center',

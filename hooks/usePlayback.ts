@@ -7,6 +7,11 @@ export default function usePlayback(mapApiRef: React.RefObject<any>, events: Eve
   const [playing, setPlaying] = useState(false);
   const [localMuted, setLocalMuted] = useState(muted);
   const utterRef = useRef<SpeechSynthesisUtterance|null>(null);
+  
+  // AUDIO PREFETCHING - kluczowe dla eliminacji opóźnień
+  const audioCacheRef = useRef<Map<string, string>>(new Map()); // text -> audioUrl
+  const audioPrefetchRef = useRef<Map<string, HTMLAudioElement>>(new Map()); // text -> Audio element
+  
   // helper: męski głos - poprawiony dla telefonów
   function pickMale(){
     const voices = window.speechSynthesis.getVoices();
@@ -40,6 +45,61 @@ export default function usePlayback(mapApiRef: React.RefObject<any>, events: Eve
     return fallback || null;
   }
 
+  // PREFETCH AUDIO - generuje audio w tle bez blokowania UI
+  async function prefetchAudio(text: string): Promise<string> {
+    // Sprawdź cache
+    if (audioCacheRef.current.has(text)) {
+      console.log("Audio prefetch: using cached audio for:", text.substring(0, 50) + "...");
+      return audioCacheRef.current.get(text)!;
+    }
+
+    console.log("Audio prefetch: generating new audio for:", text.substring(0, 50) + "...");
+    
+    try {
+      const response = await fetch("/api/narrate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text })
+      });
+      
+      const data = await response.json();
+      if (data.audioUrl) {
+        // Cache the audio URL
+        audioCacheRef.current.set(text, data.audioUrl);
+        
+        // Preload the audio element
+        const audio = new Audio(data.audioUrl);
+        audio.preload = "auto";
+        audioPrefetchRef.current.set(text, audio);
+        
+        console.log("Audio prefetch: successfully cached audio for:", text.substring(0, 50) + "...");
+        return data.audioUrl;
+      } else {
+        throw new Error("No audio URL received");
+      }
+    } catch (error) {
+      console.log("Audio prefetch failed:", error);
+      throw error;
+    }
+  }
+
+  // PREFETCH INTRO I PIERWSZEGO EVENTU - uruchom w tle
+  useEffect(() => {
+    if (summary && events.length > 0) {
+      console.log("Starting audio prefetch for intro and first event...");
+      
+      // Prefetch intro
+      prefetchAudio(summary).catch(console.error);
+      
+      // Prefetch first event
+      const firstEvent = events[0];
+      if (firstEvent) {
+        const firstEventText = `${firstEvent.year} — ${firstEvent.title}. ${firstEvent.description}`;
+        prefetchAudio(firstEventText).catch(console.error);
+      }
+    }
+  }, [summary, events]);
+
   function speak(text:string){
     return new Promise<void>((resolve)=>{
       console.log("speak() called with localMuted:", localMuted);
@@ -59,8 +119,55 @@ export default function usePlayback(mapApiRef: React.RefObject<any>, events: Eve
         }
       });
       
-      // Używaj ElevenLabs na obu platformach dla spójności głosu
-      console.log("Using ElevenLabs API for consistent voice across platforms");
+      // SPRAWDŹ CZY MAMY PREFETCHED AUDIO - TO JEST KLUCZOWE!
+      if (audioCacheRef.current.has(text)) {
+        console.log("Using prefetched audio - INSTANT PLAYBACK!");
+        const audioUrl = audioCacheRef.current.get(text)!;
+        const audio = new Audio(audioUrl);
+        
+        // Timeout fallback - krótki bo audio jest już gotowe
+        const timeoutId = setTimeout(() => {
+          console.log("Prefetched audio timeout fallback");
+          resolve();
+        }, 1000); // 1 sekunda bo audio jest już w cache
+        
+        audio.onended = () => {
+          console.log("Prefetched audio finished - onended");
+          clearTimeout(timeoutId);
+          resolve();
+        };
+        
+        audio.onerror = () => {
+          console.log("Prefetched audio failed, falling back to TTS");
+          clearTimeout(timeoutId);
+          // Fallback na Web Speech API
+          const u = new SpeechSynthesisUtterance(text);
+          u.rate = 0.9; u.pitch = 1.0; u.lang = "en-US"; u.volume = 1.0;
+          const v = pickMale(); if (v) u.voice = v;
+          u.onend = () => resolve();
+          utterRef.current = u;
+          window.speechSynthesis.cancel();
+          window.speechSynthesis.speak(u);
+        };
+        
+        // START PLAYBACK NATYCHMIAST - bez czekania na generowanie!
+        audio.play().catch(() => {
+          console.log("Prefetched audio.play() failed, using Web Speech fallback");
+          clearTimeout(timeoutId);
+          const u = new SpeechSynthesisUtterance(text);
+          u.rate = 0.9; u.pitch = 1.0; u.lang = "en-US"; u.volume = 1.0;
+          const v = pickMale(); if (v) u.voice = v;
+          u.onend = () => resolve();
+          utterRef.current = u;
+          window.speechSynthesis.cancel();
+          window.speechSynthesis.speak(u);
+        });
+        
+        return; // WYJŚCIE - audio już gra!
+      }
+      
+      // FALLBACK: Używaj ElevenLabs na obu platformach dla spójności głosu
+      console.log("No prefetched audio, using ElevenLabs API");
       
       fetch("/api/narrate", {
         method: "POST",
@@ -73,11 +180,11 @@ export default function usePlayback(mapApiRef: React.RefObject<any>, events: Eve
           console.log("ElevenLabs audio received, playing");
           const audio = new Audio(data.audioUrl);
           
-          // Timeout fallback dla auto-advance - dłuższy timeout dla lepszej synchronizacji
+          // Timeout fallback dla auto-advance - krótszy timeout dla szybszej synchronizacji
           const timeoutId = setTimeout(() => {
             console.log("ElevenLabs timeout fallback - continuing to next event");
             resolve();
-          }, 15000); // 15 sekund timeout dla lepszej synchronizacji
+          }, 3000); // 3 sekundy timeout dla szybszej synchronizacji
           
           audio.onended = () => {
             console.log("ElevenLabs audio finished - onended");
@@ -94,61 +201,75 @@ export default function usePlayback(mapApiRef: React.RefObject<any>, events: Eve
             resolve();
           });
           
-                     // Sprawdź czy audio się skończyło co 100ms dla lepszej synchronizacji
-           const checkInterval = setInterval(() => {
-             // Sprawdź czy audio ma duration i czy się skończyło
-             if (audio.ended || (audio.duration > 0 && audio.currentTime >= audio.duration - 0.1) || audio.paused) {
-               console.log("ElevenLabs audio ended check - clearing interval");
-               clearInterval(checkInterval);
-               clearTimeout(timeoutId);
-               resolve();
-             }
-           }, 100);
+          // Sprawdź czy audio się skończyło co 50ms dla szybszej synchronizacji
+          const checkInterval = setInterval(() => {
+            // Sprawdź czy audio ma duration i czy się skończyło
+            if (audio.ended || (audio.duration > 0 && audio.currentTime >= audio.duration - 0.05) || audio.paused) {
+              console.log("ElevenLabs audio ended check - clearing interval");
+              clearInterval(checkInterval);
+              clearTimeout(timeoutId);
+              resolve();
+            }
+          }, 50);
           
 
-                     audio.onerror = () => {
-             console.log("ElevenLabs failed, using Web Speech fallback");
-             clearTimeout(timeoutId);
-             clearInterval(checkInterval);
-             // Fallback na Web Speech API
-             const u = new SpeechSynthesisUtterance(text);
-             u.rate = 0.9; u.pitch = 1.0; u.lang = "en-US"; u.volume = 1.0;
-             const v = pickMale(); if (v) u.voice = v;
-             u.onend = () => resolve();
-             utterRef.current = u;
-             window.speechSynthesis.cancel();
-             window.speechSynthesis.speak(u);
-           };
+          audio.onerror = () => {
+            console.log("ElevenLabs failed, using Web Speech fallback");
+            clearTimeout(timeoutId);
+            clearInterval(checkInterval);
+            // Fallback na Web Speech API
+            const u = new SpeechSynthesisUtterance(text);
+            u.rate = 0.9; u.pitch = 1.0; u.lang = "en-US"; u.volume = 1.0;
+            const v = pickMale(); if (v) u.voice = v;
+            u.onend = () => resolve();
+            utterRef.current = u;
+            window.speechSynthesis.cancel();
+            window.speechSynthesis.speak(u);
+          };
           
-                     audio.play().catch(() => {
-             console.log("Audio.play() failed, using Web Speech fallback");
-             clearTimeout(timeoutId);
-             clearInterval(checkInterval);
-             // Fallback na Web Speech API
-             const u = new SpeechSynthesisUtterance(text);
-             u.rate = 0.9; u.pitch = 1.0; u.lang = "en-US"; u.volume = 1.0;
-             const v = pickMale(); if (v) u.voice = v;
-             u.onend = () => resolve();
-             utterRef.current = u;
-             window.speechSynthesis.cancel();
-             window.speechSynthesis.speak(u);
-           });
+          audio.play().catch(() => {
+            console.log("Audio.play() failed, using Web Speech fallback");
+            clearTimeout(timeoutId);
+            clearInterval(checkInterval);
+            // Fallback na Web Speech API
+            const u = new SpeechSynthesisUtterance(text);
+            u.rate = 0.9; u.pitch = 1.0; u.lang = "en-US"; u.volume = 1.0;
+            const v = pickMale(); if (v) u.voice = v;
+            u.onend = () => resolve();
+            utterRef.current = u;
+            window.speechSynthesis.cancel();
+            window.speechSynthesis.speak(u);
+          });
         } else {
           throw new Error("No audio URL received");
         }
       })
              .catch(error => {
-         console.log("ElevenLabs API failed, using Web Speech fallback:", error);
-         // Fallback na Web Speech API
-         const u = new SpeechSynthesisUtterance(text);
-         u.rate = 0.9; u.pitch = 1.0; u.lang = "en-US"; u.volume = 1.0;
-         const v = pickMale(); if (v) u.voice = v;
-         u.onend = () => resolve();
-         utterRef.current = u;
-         window.speechSynthesis.cancel();
-         window.speechSynthesis.speak(u);
-       });
+        console.log("ElevenLabs API failed, using Web Speech fallback:", error);
+        // Fallback na Web Speech API
+        const u = new SpeechSynthesisUtterance(text);
+        u.rate = 0.9; u.pitch = 1.0; u.lang = "en-US"; u.volume = 1.0;
+        u.onend = () => resolve();
+        utterRef.current = u;
+        window.speechSynthesis.cancel();
+        window.speechSynthesis.speak(u);
+      });
     });
+  }
+
+  // PREFETCH NASTĘPNEGO EVENTU - uruchom w tle podczas odtwarzania aktualnego
+  async function prefetchNextEvent(currentIndex: number) {
+    const nextIndex = currentIndex + 1;
+    if (nextIndex < eventsRef.current.length) {
+      const nextEvent = eventsRef.current[nextIndex];
+      const nextEventText = `${nextEvent.year} — ${nextEvent.title}. ${nextEvent.description}`;
+      
+      // Sprawdź czy już nie jest w cache
+      if (!audioCacheRef.current.has(nextEventText)) {
+        console.log(`Prefetching next event ${nextIndex} in background...`);
+        prefetchAudio(nextEventText).catch(console.error);
+      }
+    }
   }
 
   // --- STATE MACHINE ---
@@ -190,10 +311,10 @@ export default function usePlayback(mapApiRef: React.RefObject<any>, events: Eve
     if (summary && summary.trim()) {
       console.log("Reading intro...");
       await speak(summary);
-      console.log("Intro finished, waiting 0.1 seconds before first event...");
+      console.log("Intro finished, waiting 0.05 seconds before first event...");
       
-      // Czekaj tylko 0.1 sekundy przed pierwszym eventem - BARDZO SZYBKO
-      await new Promise(resolve => setTimeout(resolve, 100));
+      // Czekaj tylko 0.05 sekundy przed pierwszym eventem - BARDZO SZYBKO
+      await new Promise(resolve => setTimeout(resolve, 50));
     }
     
     phaseRef.current = "events";
@@ -225,6 +346,9 @@ export default function usePlayback(mapApiRef: React.RefObject<any>, events: Eve
     
     // Rozpocznij mówienie OD RAZU - bez żadnych opóźnień
     const speakPromise = speak(line);
+    
+    // PREFETCH NASTĘPNEGO EVENTU W TLE - nie blokuje narratora
+    prefetchNextEvent(i);
     
     // AKTYWUJ PUNKT RÓWNOLEGLE - nie blokuje narratora
     if (pt && mapApiRef.current){
@@ -261,9 +385,6 @@ export default function usePlayback(mapApiRef: React.RefObject<any>, events: Eve
     await speakPromise;
     console.log(`Event ${i} finished speaking - audio completed`);
     
-    // DODATKOWE SPRAWDZENIE - poczekaj chwilę żeby audio się na pewno skończyło
-    await new Promise(resolve => setTimeout(resolve, 200));
-    
     // wyłącz mini-waveform po zakończeniu mowy
     if (mapApiRef.current && markerIdsRef.current[i]){
       mapApiRef.current.showWaveform(markerIdsRef.current[i], false);
@@ -277,7 +398,7 @@ export default function usePlayback(mapApiRef: React.RefObject<any>, events: Eve
     }
 
     // Krótka pauza między eventami - narrator zaczyna od razu po aktywacji
-    await new Promise(resolve => setTimeout(resolve, 50));
+    await new Promise(resolve => setTimeout(resolve, 25));
 
     // auto-advance, ale tylko jeśli playing jest true i kolejny istnieje:
     if (eventsRef.current[i+1] && playingRef.current) {
@@ -369,6 +490,11 @@ export default function usePlayback(mapApiRef: React.RefObject<any>, events: Eve
     markerIdsRef.current = [];
     lastActiveIdRef.current = null;
     eventsRef.current = [];
+    
+    // WYCZYŚĆ AUDIO CACHE przy nowym scenariuszu
+    audioCacheRef.current.clear();
+    audioPrefetchRef.current.clear();
+    
     setIndex(-1); // Ustaw index na -1 od razu żeby intro było pokazywane od początku
     setPlaying(false);
     if (mapApiRef.current){
@@ -387,7 +513,7 @@ export default function usePlayback(mapApiRef: React.RefObject<any>, events: Eve
       setTimeout(() => {
         console.log("Calling playIntroThenEvents after timeout");
         playIntroThenEvents();
-      }, 100);
+      }, 50);
     }
   }, [summary, events]);
 
@@ -424,7 +550,7 @@ export default function usePlayback(mapApiRef: React.RefObject<any>, events: Eve
          console.log("Restart - events available:", events.length, "eventsRef.current length:", eventsRef.current.length);
          console.log("Restart - calling playIntroThenEvents");
          playIntroThenEvents();
-       }, 100);
+               }, 50);
     }, 
     stopAll, 
     startNewScenario,
