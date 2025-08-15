@@ -73,11 +73,11 @@ export default function usePlayback(mapApiRef: React.RefObject<any>, events: Eve
           console.log("ElevenLabs audio received, playing");
           const audio = new Audio(data.audioUrl);
           
-          // Timeout fallback dla auto-advance - dłuższy timeout dla lepszej synchronizacji
+          // Timeout fallback dla auto-advance - krótszy timeout dla szybszej synchronizacji
           const timeoutId = setTimeout(() => {
             console.log("ElevenLabs timeout fallback - continuing to next event");
             resolve();
-          }, 15000); // 15 sekund timeout dla lepszej synchronizacji
+          }, 5000); // 5 sekund timeout dla szybszej synchronizacji
           
           audio.onended = () => {
             console.log("ElevenLabs audio finished - onended");
@@ -94,59 +94,59 @@ export default function usePlayback(mapApiRef: React.RefObject<any>, events: Eve
             resolve();
           });
           
-          // Sprawdź czy audio się skończyło co 100ms dla lepszej synchronizacji
-          const checkInterval = setInterval(() => {
-            if (audio.ended || (audio.duration > 0 && audio.currentTime >= audio.duration) || audio.paused) {
-              console.log("ElevenLabs audio ended check - clearing interval");
-              clearInterval(checkInterval);
-              clearTimeout(timeoutId);
-              resolve();
-            }
-          }, 100);
+                     // Sprawdź czy audio się skończyło co 50ms dla lepszej synchronizacji
+           const checkInterval = setInterval(() => {
+             if (audio.ended || (audio.duration > 0 && audio.currentTime >= audio.duration) || audio.paused) {
+               console.log("ElevenLabs audio ended check - clearing interval");
+               clearInterval(checkInterval);
+               clearTimeout(timeoutId);
+               resolve();
+             }
+           }, 50);
           
 
-          audio.onerror = () => {
-            console.log("ElevenLabs failed, using Web Speech fallback");
-            clearTimeout(timeoutId);
-            clearInterval(checkInterval);
-            // Fallback na Web Speech API
-            const u = new SpeechSynthesisUtterance(text);
-            u.rate = 0.9; u.pitch = 1.0; u.lang = "en-US"; u.volume = 1.0;
-            const v = pickMale(); if (v) u.voice = v;
-            u.onend = () => resolve();
-            utterRef.current = u;
-            window.speechSynthesis.cancel();
-            setTimeout(() => window.speechSynthesis.speak(u), 100);
-          };
+                     audio.onerror = () => {
+             console.log("ElevenLabs failed, using Web Speech fallback");
+             clearTimeout(timeoutId);
+             clearInterval(checkInterval);
+             // Fallback na Web Speech API
+             const u = new SpeechSynthesisUtterance(text);
+             u.rate = 0.9; u.pitch = 1.0; u.lang = "en-US"; u.volume = 1.0;
+             const v = pickMale(); if (v) u.voice = v;
+             u.onend = () => resolve();
+             utterRef.current = u;
+             window.speechSynthesis.cancel();
+             window.speechSynthesis.speak(u);
+           };
           
-          audio.play().catch(() => {
-            console.log("Audio.play() failed, using Web Speech fallback");
-            clearTimeout(timeoutId);
-            clearInterval(checkInterval);
-            // Fallback na Web Speech API
-            const u = new SpeechSynthesisUtterance(text);
-            u.rate = 0.9; u.pitch = 1.0; u.lang = "en-US"; u.volume = 1.0;
-            const v = pickMale(); if (v) u.voice = v;
-            u.onend = () => resolve();
-            utterRef.current = u;
-            window.speechSynthesis.cancel();
-            setTimeout(() => window.speechSynthesis.speak(u), 100);
-          });
+                     audio.play().catch(() => {
+             console.log("Audio.play() failed, using Web Speech fallback");
+             clearTimeout(timeoutId);
+             clearInterval(checkInterval);
+             // Fallback na Web Speech API
+             const u = new SpeechSynthesisUtterance(text);
+             u.rate = 0.9; u.pitch = 1.0; u.lang = "en-US"; u.volume = 1.0;
+             const v = pickMale(); if (v) u.voice = v;
+             u.onend = () => resolve();
+             utterRef.current = u;
+             window.speechSynthesis.cancel();
+             window.speechSynthesis.speak(u);
+           });
         } else {
           throw new Error("No audio URL received");
         }
       })
-      .catch(error => {
-        console.log("ElevenLabs API failed, using Web Speech fallback:", error);
-        // Fallback na Web Speech API
-        const u = new SpeechSynthesisUtterance(text);
-        u.rate = 0.9; u.pitch = 1.0; u.lang = "en-US"; u.volume = 1.0;
-        const v = pickMale(); if (v) u.voice = v;
-        u.onend = () => resolve();
-        utterRef.current = u;
-        window.speechSynthesis.cancel();
-        setTimeout(() => window.speechSynthesis.speak(u), 100);
-      });
+             .catch(error => {
+         console.log("ElevenLabs API failed, using Web Speech fallback:", error);
+         // Fallback na Web Speech API
+         const u = new SpeechSynthesisUtterance(text);
+         u.rate = 0.9; u.pitch = 1.0; u.lang = "en-US"; u.volume = 1.0;
+         const v = pickMale(); if (v) u.voice = v;
+         u.onend = () => resolve();
+         utterRef.current = u;
+         window.speechSynthesis.cancel();
+         window.speechSynthesis.speak(u);
+       });
     });
   }
 
