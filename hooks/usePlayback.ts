@@ -189,10 +189,10 @@ export default function usePlayback(mapApiRef: React.RefObject<any>, events: Eve
     if (summary && summary.trim()) {
       console.log("Reading intro...");
       await speak(summary);
-      console.log("Intro finished, waiting 0.5 seconds before first event...");
+      console.log("Intro finished, waiting 0.1 seconds before first event...");
       
-      // Czekaj tylko 0.5 sekundy przed pierwszym eventem - SZYBKO
-      await new Promise(resolve => setTimeout(resolve, 500));
+      // Czekaj tylko 0.1 sekundy przed pierwszym eventem - BARDZO SZYBKO
+      await new Promise(resolve => setTimeout(resolve, 100));
     }
     
     phaseRef.current = "events";
@@ -273,7 +273,7 @@ export default function usePlayback(mapApiRef: React.RefObject<any>, events: Eve
     }
 
     // Krótka pauza między eventami - narrator zaczyna od razu po aktywacji
-    await new Promise(resolve => setTimeout(resolve, 200));
+    await new Promise(resolve => setTimeout(resolve, 50));
 
     // auto-advance, ale tylko jeśli playing jest true i kolejny istnieje:
     if (eventsRef.current[i+1] && playingRef.current) {
@@ -383,7 +383,7 @@ export default function usePlayback(mapApiRef: React.RefObject<any>, events: Eve
       setTimeout(() => {
         console.log("Calling playIntroThenEvents after timeout");
         playIntroThenEvents();
-      }, 500);
+      }, 100);
     }
   }, [summary, events]);
 
@@ -413,14 +413,14 @@ export default function usePlayback(mapApiRef: React.RefObject<any>, events: Eve
       console.log("Restart - calling startNewScenario");
       startNewScenario(); 
       console.log("Restart - setting timeout to restart playback");
-      setTimeout(() => {
-        console.log("Restart timeout - setting startedRef to true");
-        startedRef.current = true;
-        firstEventStartedRef.current = false;
-        console.log("Restart - events available:", events.length, "eventsRef.current length:", eventsRef.current.length);
-        console.log("Restart - calling playIntroThenEvents");
-        playIntroThenEvents();
-      }, 500);
+             setTimeout(() => {
+         console.log("Restart timeout - setting startedRef to true");
+         startedRef.current = true;
+         firstEventStartedRef.current = false;
+         console.log("Restart - events available:", events.length, "eventsRef.current length:", eventsRef.current.length);
+         console.log("Restart - calling playIntroThenEvents");
+         playIntroThenEvents();
+       }, 100);
     }, 
     stopAll, 
     startNewScenario,

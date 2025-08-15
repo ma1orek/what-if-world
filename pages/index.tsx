@@ -595,7 +595,7 @@ export default function Home(){
                   <polygon points="5,3 19,12 5,21" fill="currentColor"/>
                 </svg>
               )}
-              {!isMobile && (playing ? 'Pause' : 'Play')}
+              {isMobile ? (playing ? '' : 'PLAY') : (playing ? 'Pause' : 'Play')}
             </button>
                          <button className="btn" onClick={next} disabled={index >= events.length - 1} title="Next" style={{
                padding: isMobile ? '8px 8px 8px 8px' : '10px 16px',
