@@ -217,7 +217,15 @@ export default function usePlayback(mapApiRef: React.RefObject<any>, events: Eve
     setPlaying(true);
     const pt = ev.geoPoints?.[0];
 
-    // AKTYWUJ PUNKT OD RAZU - bez czekania na animacje
+    // NARRATOR ZACZYNA MÓWIĆ OD RAZU - bez czekania na cokolwiek
+    const line = `${ev.year} — ${ev.title}. ${ev.description}`;
+    console.log(`Reading event ${i}: ${line}`);
+    console.log(`Starting to speak event ${i} - IMMEDIATELY, no delays`);
+    
+    // Rozpocznij mówienie OD RAZU - bez żadnych opóźnień
+    const speakPromise = speak(line);
+    
+    // AKTYWUJ PUNKT RÓWNOLEGLE - nie blokuje narratora
     if (pt && mapApiRef.current){
       // utwórz marker jeśli nie istnieje (nieaktywny)
       if (!markerIdsRef.current[i]){
@@ -231,18 +239,7 @@ export default function usePlayback(mapApiRef: React.RefObject<any>, events: Eve
       // włącz mini-waveform na czas mówienia - OD RAZU
       mapApiRef.current.showWaveform(markerIdsRef.current[i], true);
       lastActiveIdRef.current = markerIdsRef.current[i];
-    }
-
-    // NARRATOR ZACZYNA MÓWIĆ OD RAZU po aktywacji punktu
-    const line = `${ev.year} — ${ev.title}. ${ev.description}`;
-    console.log(`Reading event ${i}: ${line}`);
-    console.log(`Starting to speak event ${i} - IMMEDIATELY after activation`);
-    
-    // Rozpocznij mówienie OD RAZU - bez czekania na animacje
-    const speakPromise = speak(line);
-    
-    // ANIMACJE MAPY RÓWNOLEGLE - nie blokują narratora
-    if (pt && mapApiRef.current){
+      
       // fokus - równolegle z mówieniem
       mapApiRef.current.focus(pt[0], pt[1], 2.2);
 
@@ -263,10 +260,6 @@ export default function usePlayback(mapApiRef: React.RefObject<any>, events: Eve
     await speakPromise;
     console.log(`Event ${i} finished speaking - audio completed`);
     
-    // DODATKOWE SPRAWDZENIE - poczekaj chwilę żeby audio się na pewno skończyło
-    await new Promise(resolve => setTimeout(resolve, 100));
-    console.log(`Event ${i} finished speaking - audio completed`);
-    
     // wyłącz mini-waveform po zakończeniu mowy
     if (mapApiRef.current && markerIdsRef.current[i]){
       mapApiRef.current.showWaveform(markerIdsRef.current[i], false);
@@ -280,7 +273,7 @@ export default function usePlayback(mapApiRef: React.RefObject<any>, events: Eve
     }
 
     // Krótka pauza między eventami - narrator zaczyna od razu po aktywacji
-    await new Promise(resolve => setTimeout(resolve, 200));
+    await new Promise(resolve => setTimeout(resolve, 500));
 
     // auto-advance, ale tylko jeśli playing jest true i kolejny istnieje:
     if (eventsRef.current[i+1] && playingRef.current) {
