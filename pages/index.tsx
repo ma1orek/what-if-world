@@ -546,7 +546,7 @@ export default function Home(){
                gap: isMobile ? '4px' : '8px',
                alignItems: 'center',
                justifyContent: 'center',
-               marginRight: isMobile ? '14px' : 'auto'
+               marginRight: isMobile ? '24px' : 'auto'
              }}>
                                                  <button className="btn" onClick={restart} title="Restart" style={{
                padding: isMobile ? '8px 8px 8px 8px' : '10px 16px',
